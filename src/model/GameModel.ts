@@ -18,6 +18,7 @@ class GameModel implements IObservable {
     loader.add('logo', 'fit-icon-256x256.png');
     loader.add('enemy', 'enemy1.png');
     loader.add('cannon', 'cannon.png');
+    loader.add('missile', 'missile.png');
 
     const promise = new Promise((success, error) => {
       loader.onComplete.add(success);
@@ -42,8 +43,10 @@ class GameModel implements IObservable {
       ],
     );
 
+    this.missile.push(...[new Missile({ texture: resources['missile'].texture, x: 200, y: 200, speed: 9 })]);
+
     // Add game objects to screen
-    [this.player, ...this.enemy, ...this.missile].forEach(stage.addChild);
+    stage.addChild(this.player, ...this.enemy, ...this.missile);
   }
 
   notifyObservers(): void {
