@@ -1,5 +1,5 @@
 import { GameModel } from '../model';
-import { keyPressConverter } from '../utils';
+import { getMoveDirection, isSpacebar } from '../utils';
 
 class GameController {
   private model: GameModel;
@@ -7,7 +7,7 @@ class GameController {
 
   constructor(model: GameModel) {
     this.model = model;
-    this.observePressedKeys();
+    this.handleKeyPress();
   }
 
   /**
@@ -15,25 +15,35 @@ class GameController {
    */
   public processUserInput() {
     this.pressedKeys.forEach(key => {
-      const direction = keyPressConverter(key);
+      const direction = getMoveDirection(key);
       if (direction !== null) {
         this.model.move(direction);
-      } else if (key === ' ') {
-        // ' ' === spacebar
+      } else if (isSpacebar(key)) {
         this.model.cannonShoot();
       }
     });
+
+    this.pressedKeys = this.pressedKeys.filter(key => !isSpacebar(key));
   }
 
   /**
    * Process user input
    */
-  private observePressedKeys() {
+  private handleKeyPress() {
     window.addEventListener(
       'keydown',
       e => {
-        if (!this.pressedKeys.includes(e.key)) {
-          this.pressedKeys.push(e.key);
+        if (e.code !== 'Space' && !this.pressedKeys.includes(e.code)) {
+          this.pressedKeys.push(e.code);
+        }
+      },
+      false,
+    );
+    window.addEventListener(
+      'keypress',
+      e => {
+        if (e.code === 'Space' && !this.pressedKeys.includes(e.code)) {
+          this.pressedKeys.push(e.code);
         }
       },
       false,
@@ -41,7 +51,9 @@ class GameController {
     window.addEventListener(
       'keyup',
       e => {
-        this.pressedKeys = this.pressedKeys.filter(key => key !== e.key);
+        if (e.code !== 'Space') {
+          this.pressedKeys = this.pressedKeys.filter(key => key !== e.code);
+        }
       },
       false,
     );

@@ -13,6 +13,10 @@ abstract class BaseGameObjectsFactory implements IGameObjectFactory {
   abstract createCannon();
 
   abstract createMissile(position: PositionShape);
+
+  abstract createEnemy(position: PositionShape);
+
+  abstract createGameInfo();
 }
 
 export default BaseGameObjectsFactory;

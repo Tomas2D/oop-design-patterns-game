@@ -28,12 +28,14 @@ class Game {
     document.getElementById(GAME_CONTAINER_ID_SELECTOR)!.appendChild(this.app.view);
     document.body.style.overflow = 'hidden';
 
-    // Init controls
+    // MVC
     this.model = new GameModel(this.app);
     this.view = new GameView(this.model);
+    this.view.setRenderContext(this.app.stage);
+
     this.controller = this.view.getController();
 
-    // Init game objects from model
+    // Init game objects
     await this.model.createGameObjects();
 
     // Fire game loop
@@ -41,6 +43,7 @@ class Game {
       this.controller.processUserInput(); // move with user
       this.model.update(); // move with other game objects
       this.view.render(delta); // render score?
+      this.app.render();
     });
   }
 }

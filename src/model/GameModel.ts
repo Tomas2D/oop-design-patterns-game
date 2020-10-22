@@ -1,4 +1,5 @@
-import { Enemy, GameInfo, MoveDirection } from '../entity';
+import * as PIXI from 'pixi.js';
+
 import { GAME_RESOURCE_PATH } from '~config';
 import IObservable from '../interface/observer/IObservable';
 import IObserver from '../interface/observer/IObserver';
@@ -6,21 +7,30 @@ import IGameObjectFactory from '~interface/abstract-factory/IGameObjectFactory';
 import GameObjectsFactory_A from '~abstract-factory/GameObjectsFactory_A';
 import AbstractMissile from '~entity/abstract/AbstractMissile';
 import AbstractCannon from '~entity/abstract/AbstractCannon';
+import GameObject, { MoveDirection } from '~entity/abstract/GameObject';
+import AbstractEnemy from '~entity/abstract/AbstractEnemy';
+import AbstractGameInfo from '~entity/abstract/AbstractGameInfo';
+import { PositionShape } from '~interface/entity/PositionInterface';
 
 class GameModel implements IObservable {
   private readonly app: PIXI.Application;
 
-  private gameInfo: GameInfo;
-
+  /* Game objects */
   private cannon: AbstractCannon;
-  private enemies: Enemy[] = [];
+  private enemies: AbstractEnemy[] = [];
   private missiles: AbstractMissile[] = [];
+  private gameInfo: AbstractGameInfo;
 
+  /* Observers */
   private observers: Array<IObserver> = [];
 
+  /* Factories */
   private gameObjectFactory: IGameObjectFactory;
 
-  public constructor(app: PIXI.Application) {
+  /* Score */
+  private score: number = 0;
+
+  constructor(app: PIXI.Application) {
     this.app = app;
     this.gameObjectFactory = new GameObjectsFactory_A(app.loader.resources);
   }
@@ -48,22 +58,14 @@ class GameModel implements IObservable {
     // Firstly we need to load resources
     await this.loadResources();
 
-    const { loader, stage } = this.app;
-    const { resources } = loader;
-
     this.cannon = this.gameObjectFactory.createCannon();
-    this.enemies.push(
-      ...[
-        new Enemy({ texture: resources['enemies'].texture, x: 200, y: 100, speed: 3 }),
-        new Enemy({ texture: resources['enemies'].texture, x: 250, y: 140, speed: 3 }),
-        new Enemy({ texture: resources['enemies'].texture, x: 302, y: 245, speed: 3 }),
-      ],
-    );
-
-    // this.missiles.push(this.gameObjectFactory.createMissile());
+    for (let i = 0; i < 5; i++) {
+      const position: PositionShape = this.generateEnemyPosition();
+      this.enemies.push(this.gameObjectFactory.createEnemy(position));
+    }
 
     // Add game objects to screen
-    stage.addChild(this.cannon, ...this.enemies, ...this.missiles);
+    this.app.stage.addChild(...this.getGameObjects());
   }
 
   notifyObservers(): void {
@@ -113,6 +115,19 @@ class GameModel implements IObservable {
 
     this.app.stage.addChild(missile);
     this.notifyObservers();
+  }
+
+  public getGameObjects(): GameObject[] {
+    return [this.cannon, ...this.missiles, ...this.enemies];
+  }
+
+  private generateEnemyPosition(): PositionShape {
+    const { clientWidth, clientHeight } = this.app.view;
+
+    return {
+      x: Math.max(250, (100 + Math.floor(clientWidth / Math.random())) % (clientWidth - 50)),
+      y: Math.max(110, (100 + Math.floor(clientHeight / Math.random())) % (clientHeight - 50)),
+    };
   }
 }
 
