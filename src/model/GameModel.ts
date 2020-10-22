@@ -1,22 +1,36 @@
-import { GameObject, MoveDirection, Enemy, Cannon, GameInfo, Missile } from '../entity';
-import { GAME_RESOURCE_PATH } from '../config';
+import { Enemy, GameInfo, MoveDirection } from '../entity';
+import { GAME_RESOURCE_PATH } from '~config';
 import IObservable from '../interface/observer/IObservable';
 import IObserver from '../interface/observer/IObserver';
+import IGameObjectFactory from '~interface/abstract-factory/IGameObjectFactory';
+import GameObjectsFactory_A from '~abstract-factory/GameObjectsFactory_A';
+import AbstractMissile from '~entity/abstract/AbstractMissile';
+import AbstractCannon from '~entity/abstract/AbstractCannon';
 
 class GameModel implements IObservable {
-  private player: GameObject;
+  private readonly app: PIXI.Application;
+
   private gameInfo: GameInfo;
-  private enemy: Enemy[] = [];
-  private missile: Missile[] = [];
+
+  private cannon: AbstractCannon;
+  private enemies: Enemy[] = [];
+  private missiles: AbstractMissile[] = [];
 
   private observers: Array<IObserver> = [];
 
-  public async loadResources(app: PIXI.Application) {
-    const { loader } = app;
+  private gameObjectFactory: IGameObjectFactory;
+
+  public constructor(app: PIXI.Application) {
+    this.app = app;
+    this.gameObjectFactory = new GameObjectsFactory_A(app.loader.resources);
+  }
+
+  private async loadResources() {
+    const { loader } = this.app;
 
     loader.baseUrl = GAME_RESOURCE_PATH;
     loader.add('logo', 'fit-icon-256x256.png');
-    loader.add('enemy', 'enemy1.png');
+    loader.add('enemies', 'enemy1.png');
     loader.add('cannon', 'cannon.png');
     loader.add('missile', 'missile.png');
 
@@ -30,23 +44,26 @@ class GameModel implements IObservable {
     return await promise;
   }
 
-  public createGameObjects(app: PIXI.Application) {
-    const { loader, stage } = app;
+  public async createGameObjects() {
+    // Firstly we need to load resources
+    await this.loadResources();
+
+    const { loader, stage } = this.app;
     const { resources } = loader;
 
-    this.player = new Cannon({ texture: resources['cannon'].texture, x: 50, y: 50, speed: 6 });
-    this.enemy.push(
+    this.cannon = this.gameObjectFactory.createCannon();
+    this.enemies.push(
       ...[
-        new Enemy({ texture: resources['enemy'].texture, x: 200, y: 100, speed: 3 }),
-        new Enemy({ texture: resources['enemy'].texture, x: 250, y: 140, speed: 3 }),
-        new Enemy({ texture: resources['enemy'].texture, x: 302, y: 245, speed: 3 }),
+        new Enemy({ texture: resources['enemies'].texture, x: 200, y: 100, speed: 3 }),
+        new Enemy({ texture: resources['enemies'].texture, x: 250, y: 140, speed: 3 }),
+        new Enemy({ texture: resources['enemies'].texture, x: 302, y: 245, speed: 3 }),
       ],
     );
 
-    this.missile.push(...[new Missile({ texture: resources['missile'].texture, x: 200, y: 200, speed: 9 })]);
+    // this.missiles.push(this.gameObjectFactory.createMissile());
 
     // Add game objects to screen
-    stage.addChild(this.player, ...this.enemy, ...this.missile);
+    stage.addChild(this.cannon, ...this.enemies, ...this.missiles);
   }
 
   notifyObservers(): void {
@@ -64,12 +81,38 @@ class GameModel implements IObservable {
   }
 
   move(direction: MoveDirection) {
-    this.player.move(direction);
+    this.cannon.move(direction);
     this.notifyObservers();
   }
 
   public update() {
-    // nothing
+    this.moveMissiles();
+    this.destroyMissiles();
+    this.notifyObservers();
+  }
+
+  public destroyMissiles() {
+    for (let index = this.missiles.length - 1; index >= 0; index--) {
+      const missile = this.missiles[index];
+      if (missile.position.x > this.app.screen.right) {
+        this.app.stage.removeChild(missile);
+        this.missiles.splice(index, 1);
+      }
+    }
+  }
+
+  public moveMissiles() {
+    this.missiles.forEach(missile => {
+      missile.move(MoveDirection.RIGHT);
+    });
+  }
+
+  public cannonShoot() {
+    const missile = this.cannon.shoot();
+    this.missiles.push(missile);
+
+    this.app.stage.addChild(missile);
+    this.notifyObservers();
   }
 }
 

@@ -18,6 +18,9 @@ class GameController {
       const direction = keyPressConverter(key);
       if (direction !== null) {
         this.model.move(direction);
+      } else if (key === ' ') {
+        // ' ' === spacebar
+        this.model.cannonShoot();
       }
     });
   }

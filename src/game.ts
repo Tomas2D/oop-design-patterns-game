@@ -29,12 +29,12 @@ class Game {
     document.body.style.overflow = 'hidden';
 
     // Init controls
-    this.model = new GameModel();
+    this.model = new GameModel(this.app);
     this.view = new GameView(this.model);
     this.controller = this.view.getController();
 
-    await this.model.loadResources(this.app);
-    this.model.createGameObjects(this.app);
+    // Init game objects from model
+    await this.model.createGameObjects();
 
     // Fire game loop
     this.app.ticker.add(delta => {

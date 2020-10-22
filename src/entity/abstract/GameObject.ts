@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 
-type GameObjectShape = {
+export type GameObjectShape = {
   texture: PIXI.Texture;
   x: number;
   y: number;

@@ -7,7 +7,7 @@
     "start": "rm -Rf .cache; rm -Rf dist; parcel src/index.html",
     "build": "rm -Rf .cache; rm -Rf dist; parcel build src/index.html"
   },
-  "author": "",
+  "author": "Tomáš Dvořák (Tomas2D)",
   "license": "ISC",
   "dependencies": {
     "eslint": "^7.10.0",
