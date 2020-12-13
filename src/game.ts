@@ -1,14 +1,17 @@
 import * as PIXI from 'pixi.js';
 import { GAME_CONFIG, GAME_CONTAINER_ID_SELECTOR } from './config';
 
-import GameModel from './model/GameModel';
 import GameView from './view/GameView';
 import GameController from './controller/GameController';
+import CareTaker from '~memento/CareTaker';
+import IGameModel from '~interface/proxy/IGameModel';
+import GameModel from '~model/GameModel';
+import GameModelProxy from '~proxy/GameModelProxy';
 
 class Game {
   private app: PIXI.Application;
 
-  private model: GameModel;
+  private model: IGameModel;
   private view: GameView;
   private controller: GameController;
 
@@ -17,7 +20,7 @@ class Game {
    */
   public async init() {
     // Prepare Pixi
-    this.app = new PIXI.Application(GAME_CONFIG);
+    this.app = new PIXI.Application(GAME_CONFIG.PIXI);
     this.app.stage.hitArea = new PIXI.Rectangle(
       0,
       0,
@@ -29,7 +32,7 @@ class Game {
     document.body.style.overflow = 'hidden';
 
     // MVC
-    this.model = new GameModel(this.app);
+    this.model = new GameModelProxy(new GameModel(this.app));
     this.view = new GameView(this.model);
     this.view.setRenderContext(this.app.stage);
 
@@ -42,9 +45,12 @@ class Game {
     this.app.ticker.add(delta => {
       this.controller.processUserInput(); // move with user
       this.model.update(); // move with other game objects
-      this.view.render(delta); // render score?
+      this.view.render(); // render score?
       this.app.render();
     });
+
+    // CareTaker
+    CareTaker.getInstance().setModel(this.model);
   }
 }
 

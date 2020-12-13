@@ -1,16 +1,16 @@
 import GameController from '../controller/GameController';
-import GameModel from '../model/GameModel';
 import GameObjectsRender from '~visitor/GameObjectsRender';
 import IObserver from '../interface/observer/IObserver';
 import * as PIXI from 'pixi.js';
+import IGameModel from '~interface/proxy/IGameModel';
 
 class GameView implements IObserver {
   private readonly controller: GameController;
-  private model: GameModel;
+  private model: IGameModel;
   private readonly gameObjectVisitor;
   private visitorRenderContext: PIXI.Container;
 
-  constructor(model: GameModel) {
+  constructor(model: IGameModel) {
     this.model = model;
     this.gameObjectVisitor = new GameObjectsRender();
     this.controller = new GameController(model);
@@ -29,7 +29,7 @@ class GameView implements IObserver {
     return this.controller;
   }
 
-  public render(delta: number) {
+  public render() {
     // clear context
     this.visitorRenderContext.removeChildren();
 
@@ -39,7 +39,7 @@ class GameView implements IObserver {
   }
 
   public update(): void {
-    this.render(0);
+    this.render();
   }
 }
 

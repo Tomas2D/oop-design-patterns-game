@@ -25,9 +25,13 @@ class GameObjectsRender implements IGameObjectVisitor {
   }
 
   visitCannon(cannon: AbstractCannon) {
-    this.renderTextInfo(`Y: ${cannon.position.y}`, {
-      x: cannon.position.x - cannon.width / 2,
-      y: cannon.position.y - cannon.height / 2,
+    const x = cannon.position.x - cannon.width / 2;
+    const y = cannon.position.y - cannon.height / 2;
+
+    this.renderTextInfo(`Y: ${cannon.position.y}`, { x, y });
+    this.renderTextInfo(`Angle: ${cannon.getAngle().toFixed(1)}`, {
+      x,
+      y: y + 15,
     });
   }
 

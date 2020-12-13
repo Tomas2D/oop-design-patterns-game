@@ -1,6 +1,6 @@
 import { MoveDirection } from '../entity/abstract/GameObject';
 
-const allowedKeysForMove = {
+export const allowedKeysForMove = {
   ArrowLeft: MoveDirection.LEFT,
   ArrowRight: MoveDirection.RIGHT,
   ArrowUp: MoveDirection.TOP,

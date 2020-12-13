@@ -1,7 +1,6 @@
 import * as PIXI from 'pixi.js';
 
 import { GAME_RESOURCE_PATH } from '~config';
-import IObservable from '../interface/observer/IObservable';
 import IObserver from '../interface/observer/IObserver';
 import IGameObjectFactory from '~interface/abstract-factory/IGameObjectFactory';
 import GameObjectsFactory_A from '~abstract-factory/GameObjectsFactory_A';
@@ -11,15 +10,29 @@ import GameObject, { MoveDirection } from '~entity/abstract/GameObject';
 import AbstractEnemy from '~entity/abstract/AbstractEnemy';
 import AbstractGameInfo from '~entity/abstract/AbstractGameInfo';
 import { PositionShape } from '~interface/entity/PositionInterface';
+import IMovingStrategy from '~interface/strategy/IMovingStrategy';
+import RealisticMovingStrategy from '~strategy/RealisticMovingStrategy';
+import IGameModel from '~interface/proxy/IGameModel';
+import { AbstractGameCommand } from '~command/AbstractGameCommand';
+import { Queue } from 'queue-typescript';
+import { Stack } from 'stack-typescript';
 
-class GameModel implements IObservable {
-  private readonly app: PIXI.Application;
+class Memento {
+  public score: number;
+}
+
+class GameModel implements IGameModel {
+  readonly app: PIXI.Application;
 
   /* Game objects */
   private cannon: AbstractCannon;
   private enemies: AbstractEnemy[] = [];
   private missiles: AbstractMissile[] = [];
   private gameInfo: AbstractGameInfo;
+
+  /** Game commands */
+  private unexecutedCommands: Queue<AbstractGameCommand>;
+  private executedCommands: Stack<AbstractGameCommand>;
 
   /* Observers */
   private observers: Array<IObserver> = [];
@@ -30,12 +43,16 @@ class GameModel implements IObservable {
   /* Score */
   private score: number = 0;
 
+  /* Strategies */
+  readonly movingStrategy: IMovingStrategy;
+
   constructor(app: PIXI.Application) {
     this.app = app;
-    this.gameObjectFactory = new GameObjectsFactory_A(app.loader.resources);
+    this.gameObjectFactory = new GameObjectsFactory_A(app.loader.resources, this);
+    this.movingStrategy = new RealisticMovingStrategy();
   }
 
-  private async loadResources() {
+  async loadResources() {
     const { loader } = this.app;
 
     loader.baseUrl = GAME_RESOURCE_PATH;
@@ -54,14 +71,21 @@ class GameModel implements IObservable {
     return await promise;
   }
 
-  public async createGameObjects() {
+  async createGameObjects() {
     // Firstly we need to load resources
     await this.loadResources();
 
     this.cannon = this.gameObjectFactory.createCannon();
+
+    const enemy = this.gameObjectFactory.createEnemy(this.generateEnemyPosition());
+    this.enemies.push(enemy);
+
     for (let i = 0; i < 5; i++) {
-      const position: PositionShape = this.generateEnemyPosition();
-      this.enemies.push(this.gameObjectFactory.createEnemy(position));
+      const clonedEnemy = enemy.clone();
+      const { x, y } = this.generateEnemyPosition();
+      enemy.position.set(x, y);
+
+      this.enemies.push(clonedEnemy);
     }
 
     // Add game objects to screen
@@ -87,13 +111,14 @@ class GameModel implements IObservable {
     this.notifyObservers();
   }
 
-  public update() {
+  update() {
+    this.executeCommands();
     this.moveMissiles();
     this.destroyMissiles();
     this.notifyObservers();
   }
 
-  public destroyMissiles() {
+  destroyMissiles() {
     for (let index = this.missiles.length - 1; index >= 0; index--) {
       const missile = this.missiles[index];
       if (missile.position.x > this.app.screen.right) {
@@ -103,31 +128,96 @@ class GameModel implements IObservable {
     }
   }
 
-  public moveMissiles() {
+  moveMissiles() {
     this.missiles.forEach(missile => {
-      missile.move(MoveDirection.RIGHT);
+      missile.move();
     });
-  }
 
-  public cannonShoot() {
-    const missile = this.cannon.shoot();
-    this.missiles.push(missile);
-
-    this.app.stage.addChild(missile);
+    this.destroyMissiles();
     this.notifyObservers();
   }
 
-  public getGameObjects(): GameObject[] {
+  cannonShoot() {
+    const missiles = this.cannon.shoot();
+    this.missiles.push(...missiles);
+
+    this.app.stage.addChild(...missiles);
+    this.notifyObservers();
+  }
+
+  getGameObjects(): GameObject[] {
     return [this.cannon, ...this.missiles, ...this.enemies];
   }
 
-  private generateEnemyPosition(): PositionShape {
+  generateEnemyPosition(): PositionShape {
     const { clientWidth, clientHeight } = this.app.view;
 
     return {
       x: Math.max(250, (100 + Math.floor(clientWidth / Math.random())) % (clientWidth - 50)),
       y: Math.max(110, (100 + Math.floor(clientHeight / Math.random())) % (clientHeight - 50)),
     };
+  }
+
+  getMovingStrategy(): IMovingStrategy {
+    return this.movingStrategy;
+  }
+
+  aimCannonUp() {
+    this.cannon.aimUp();
+  }
+
+  aimCannonDown() {
+    this.cannon.aimDown();
+  }
+
+  cannonPowerUp() {
+    this.cannon.powerUp();
+  }
+
+  cannonPowerDown() {
+    this.cannon.powerDown();
+  }
+
+  cannonToggleShootingMode() {
+    console.info('Changing shooting mode');
+    this.cannon.toggleShootingMode();
+  }
+
+  createMemento(): object {
+    const memento = new Memento();
+    memento.score = this.score;
+    return memento;
+  }
+
+  // @ts-ignore
+  setMemento(memento: object) {
+    const m: Memento = memento as Memento;
+
+    this.score = m.score;
+  }
+
+  registerCommand(command: AbstractGameCommand) {
+    this.unexecutedCommands.append(command);
+  }
+
+  undoLastCommand(): void {
+    if (this.executedCommands.length === 0) {
+      return;
+    }
+
+    const command = this.executedCommands.pop();
+    command.unExecute();
+
+    this.notifyObservers();
+  }
+
+  private executeCommands(): void {
+    while (this.unexecutedCommands.length !== 0) {
+      const command = this.unexecutedCommands.dequeue();
+      command.doExecute();
+
+      this.executedCommands.push(command);
+    }
   }
 }
 

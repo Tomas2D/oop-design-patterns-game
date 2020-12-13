@@ -1,18 +1,19 @@
 import IGameObjectFactory from '~interface/abstract-factory/IGameObjectFactory';
-import Cannon_A from '~entity/familyA/Cannon_A';
-import Missile_A from '~entity/familyA/Missile_A';
 import { PositionShape } from '~interface/entity/PositionInterface';
+import IGameModel from '~interface/proxy/IGameModel';
 
 abstract class BaseGameObjectsFactory implements IGameObjectFactory {
   protected readonly resources: PIXI.IResourceDictionary;
+  protected readonly gameModel: IGameModel;
 
-  public constructor(resources: PIXI.IResourceDictionary) {
+  public constructor(resources: PIXI.IResourceDictionary, gameModel: IGameModel) {
     this.resources = resources;
+    this.gameModel = gameModel;
   }
 
   abstract createCannon();
 
-  abstract createMissile(position: PositionShape);
+  abstract createMissile(position: PositionShape, angle: Number, velocity: Number);
 
   abstract createEnemy(position: PositionShape);
 

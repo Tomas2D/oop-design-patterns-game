@@ -6,7 +6,7 @@ import AbstractGameInfo from '~entity/abstract/AbstractGameInfo';
 
 interface IGameObjectFactory {
   createCannon(): AbstractCannon;
-  createMissile(position: PositionShape): AbstractMissile;
+  createMissile(position: PositionShape, angle: Number, velocity: Number): AbstractMissile;
   createEnemy(position: PositionShape): AbstractEnemy;
   createGameInfo(): AbstractGameInfo;
 }
