@@ -6,9 +6,7 @@ import { PositionShape } from '~interface/entity/PositionInterface';
 import { AbstractGameCommand } from '~command/AbstractGameCommand';
 
 interface IGameModel extends IObservable {
-  loadResources(): Promise<unknown>;
-
-  createGameObjects(): Promise<void>;
+  createGameObjects();
 
   notifyObservers(): void;
 
@@ -48,6 +46,8 @@ interface IGameModel extends IObservable {
 
   registerCommand(command: AbstractGameCommand);
   undoLastCommand(): void;
+
+  loadResources();
 }
 
 export default IGameModel;

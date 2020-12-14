@@ -8,7 +8,7 @@ import SingleShootingMode from '~state/SingleShootingMode';
 import DoubleShootingMode from '~state/DoubleShootingMode';
 
 abstract class AbstractCannon extends GameObject {
-  private power: number = 10;
+  private power: number = 25;
   protected gameObjectFactory: IGameObjectFactory;
   protected shootingMode: IShootingMode;
 
@@ -83,6 +83,10 @@ abstract class AbstractCannon extends GameObject {
     } else {
       throw Error('shootingMode does not exists!');
     }
+  }
+
+  public getShootingMode() {
+    return this.shootingMode;
   }
 }
 

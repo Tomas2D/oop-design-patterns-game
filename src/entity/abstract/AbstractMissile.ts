@@ -1,6 +1,5 @@
 import IGameObjectVisitor from '~interface/visitor/IGameObjectVisitor';
 import LifeTimeLimitedGameObject from '~entity/abstract/LifeTimeLimitedGameObject';
-import { PositionShape } from '~interface/entity/PositionInterface';
 
 abstract class AbstractMissile extends LifeTimeLimitedGameObject {
   private initAngle: number;

@@ -2,7 +2,7 @@ import GameObject from '~entity/abstract/GameObject';
 import IGameObjectVisitor from '~interface/visitor/IGameObjectVisitor';
 
 abstract class LifeTimeLimitedGameObject extends GameObject {
-  private bornAt: number;
+  private readonly bornAt: number;
 
   public constructor(params) {
     super(params);

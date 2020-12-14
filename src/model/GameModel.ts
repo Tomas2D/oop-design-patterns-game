@@ -1,12 +1,13 @@
 import * as PIXI from 'pixi.js';
+import { Loader } from 'pixi.js';
 
-import { GAME_RESOURCE_PATH } from '~config';
+import { GAME_CONFIG, GAME_RESOURCE_PATH } from '~config';
 import IObserver from '../interface/observer/IObserver';
-import IGameObjectFactory from '~interface/abstract-factory/IGameObjectFactory';
+import IGameObjectFactory, { EnemyType } from '~interface/abstract-factory/IGameObjectFactory';
 import GameObjectsFactory_A from '~abstract-factory/GameObjectsFactory_A';
 import AbstractMissile from '~entity/abstract/AbstractMissile';
 import AbstractCannon from '~entity/abstract/AbstractCannon';
-import GameObject, { MoveDirection } from '~entity/abstract/GameObject';
+import GameObject, { GameObjectSizes, MoveDirection } from '~entity/abstract/GameObject';
 import AbstractEnemy from '~entity/abstract/AbstractEnemy';
 import AbstractGameInfo from '~entity/abstract/AbstractGameInfo';
 import { PositionShape } from '~interface/entity/PositionInterface';
@@ -16,23 +17,28 @@ import IGameModel from '~interface/proxy/IGameModel';
 import { AbstractGameCommand } from '~command/AbstractGameCommand';
 import { Queue } from 'queue-typescript';
 import { Stack } from 'stack-typescript';
+import AbstractCollision from '~entity/abstract/AbstractCollision';
 
+// As there is no export, it is like Java private class
 class Memento {
   public score: number;
+  public cannonX: number;
+  public cannonY: number;
 }
 
-class GameModel implements IGameModel {
-  readonly app: PIXI.Application;
+export class GameModel implements IGameModel {
+  private readonly loader: Loader;
 
   /* Game objects */
   private cannon: AbstractCannon;
   private enemies: AbstractEnemy[] = [];
   private missiles: AbstractMissile[] = [];
+  private collisions: AbstractCollision[] = [];
   private gameInfo: AbstractGameInfo;
 
   /** Game commands */
-  private unexecutedCommands: Queue<AbstractGameCommand>;
-  private executedCommands: Stack<AbstractGameCommand>;
+  private unexecutedCommands: Queue<AbstractGameCommand> = new Queue<AbstractGameCommand>();
+  private executedCommands: Stack<AbstractGameCommand> = new Stack<AbstractGameCommand>();
 
   /* Observers */
   private observers: Array<IObserver> = [];
@@ -44,52 +50,36 @@ class GameModel implements IGameModel {
   private score: number = 0;
 
   /* Strategies */
-  readonly movingStrategy: IMovingStrategy;
+  private readonly movingStrategy: IMovingStrategy;
 
-  constructor(app: PIXI.Application) {
-    this.app = app;
-    this.gameObjectFactory = new GameObjectsFactory_A(app.loader.resources, this);
+  constructor(loader?: Loader) {
+    this.loader = loader || new PIXI.Loader();
+    this.loader.baseUrl = GAME_RESOURCE_PATH;
+    this.gameObjectFactory = new GameObjectsFactory_A(this.loader, this);
     this.movingStrategy = new RealisticMovingStrategy();
   }
 
   async loadResources() {
-    const { loader } = this.app;
-
-    loader.baseUrl = GAME_RESOURCE_PATH;
-    loader.add('logo', 'fit-icon-256x256.png');
-    loader.add('enemies', 'enemy1.png');
-    loader.add('cannon', 'cannon.png');
-    loader.add('missile', 'missile.png');
-
-    const promise = new Promise((success, error) => {
-      loader.onComplete.add(success);
-      loader.onError.add(error);
-    });
-
-    loader.load();
-
-    return await promise;
+    return await this.gameObjectFactory.loadResources();
   }
 
-  async createGameObjects() {
-    // Firstly we need to load resources
-    await this.loadResources();
-
-    this.cannon = this.gameObjectFactory.createCannon();
-
-    const enemy = this.gameObjectFactory.createEnemy(this.generateEnemyPosition());
+  createEnemies(enemiesCount) {
+    const enemyType = Math.random() < 0.5 ? EnemyType.A : EnemyType.B;
+    const enemy = this.gameObjectFactory.createEnemy(this.generateEnemyPosition(), enemyType);
     this.enemies.push(enemy);
 
-    for (let i = 0; i < 5; i++) {
-      const clonedEnemy = enemy.clone();
+    for (let i = 0; i < enemiesCount - 1; i++) {
+      const clonedEnemy = enemy.clone(); // ProtoType pattern
       const { x, y } = this.generateEnemyPosition();
       enemy.position.set(x, y);
 
       this.enemies.push(clonedEnemy);
     }
+  }
 
-    // Add game objects to screen
-    this.app.stage.addChild(...this.getGameObjects());
+  createGameObjects(enemiesCount = 10) {
+    this.cannon = this.gameObjectFactory.createCannon();
+    this.createEnemies(enemiesCount);
   }
 
   notifyObservers(): void {
@@ -115,23 +105,51 @@ class GameModel implements IGameModel {
     this.executeCommands();
     this.moveMissiles();
     this.destroyMissiles();
+    this.destroyCollisions();
     this.notifyObservers();
+
+    if (this.enemies.length === 0) {
+      this.createEnemies(GAME_CONFIG.GAME.enemiesCount);
+    }
   }
 
   destroyMissiles() {
     for (let index = this.missiles.length - 1; index >= 0; index--) {
       const missile = this.missiles[index];
-      if (missile.position.x > this.app.screen.right) {
-        this.app.stage.removeChild(missile);
+      if (missile.position.x > GAME_CONFIG.PIXI.width) {
         this.missiles.splice(index, 1);
       }
     }
   }
 
+  private checkCollision(a: GameObjectSizes, b: GameObjectSizes) {
+    return a.x + a.width > b.x && a.x < b.x + b.width && a.y + a.height > b.y && a.y < b.y + b.height;
+  }
+
   moveMissiles() {
-    this.missiles.forEach(missile => {
+    for (let i = this.missiles.length - 1; i >= 0; i--) {
+      const missile = this.missiles[i];
       missile.move();
-    });
+
+      for (let j = this.enemies.length - 1; j >= 0; j--) {
+        const enemy = this.enemies[j];
+
+        if (this.checkCollision(missile, enemy)) {
+          enemy.hp -= this.cannon.getPower();
+
+          this.missiles.splice(i, 1);
+
+          if (enemy.hp <= 0) {
+            const collision = this.gameObjectFactory.createCollision({ x: enemy.x, y: enemy.y });
+            this.collisions.push(collision);
+
+            this.missiles.splice(i, 1);
+            this.enemies.splice(j, 1);
+            this.score++;
+          }
+        }
+      }
+    }
 
     this.destroyMissiles();
     this.notifyObservers();
@@ -141,21 +159,35 @@ class GameModel implements IGameModel {
     const missiles = this.cannon.shoot();
     this.missiles.push(...missiles);
 
-    this.app.stage.addChild(...missiles);
     this.notifyObservers();
   }
 
   getGameObjects(): GameObject[] {
-    return [this.cannon, ...this.missiles, ...this.enemies];
+    return [this.cannon, ...this.missiles, ...this.enemies, ...this.collisions];
+  }
+
+  getEnemies(): AbstractEnemy[] {
+    return this.enemies;
   }
 
   generateEnemyPosition(): PositionShape {
-    const { clientWidth, clientHeight } = this.app.view;
+    const { width: clientWidth, height: clientHeight } = GAME_CONFIG.PIXI;
 
-    return {
+    const position = {
       x: Math.max(250, (100 + Math.floor(clientWidth / Math.random())) % (clientWidth - 50)),
       y: Math.max(110, (100 + Math.floor(clientHeight / Math.random())) % (clientHeight - 50)),
     };
+
+    const hasCollision = this.enemies.some(enemy => {
+      return this.checkCollision(enemy, { ...position, width: enemy.width + 50, height: enemy.height + 25 });
+    });
+
+    // Generate again
+    if (hasCollision) {
+      return this.generateEnemyPosition();
+    }
+
+    return position;
   }
 
   getMovingStrategy(): IMovingStrategy {
@@ -179,21 +211,31 @@ class GameModel implements IGameModel {
   }
 
   cannonToggleShootingMode() {
-    console.info('Changing shooting mode');
     this.cannon.toggleShootingMode();
   }
 
-  createMemento(): object {
-    const memento = new Memento();
-    memento.score = this.score;
-    return memento;
+  getCannon(): AbstractCannon {
+    return this.cannon;
   }
 
-  // @ts-ignore
+  getCannonPosition(): PositionShape {
+    return { x: this.cannon.x, y: this.cannon.y };
+  }
+
+  createMemento(): object {
+    const m = new Memento();
+    m.score = this.score;
+    m.cannonX = this.cannon.x;
+    m.cannonY = this.cannon.y;
+
+    return m;
+  }
+
   setMemento(memento: object) {
     const m: Memento = memento as Memento;
 
     this.score = m.score;
+    this.cannon.position.set(m.cannonX, m.cannonY);
   }
 
   registerCommand(command: AbstractGameCommand) {
@@ -219,6 +261,10 @@ class GameModel implements IGameModel {
       this.executedCommands.push(command);
     }
   }
-}
 
-export default GameModel;
+  private destroyCollisions() {
+    this.collisions = this.collisions.filter(collision => {
+      return collision.getAge() * 1000 < GAME_CONFIG.GAME.collisionLifeTime;
+    });
+  }
+}

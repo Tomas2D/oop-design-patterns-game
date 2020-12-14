@@ -9,6 +9,9 @@ export type GameConfigShape = {
   GAME: {
     gravity: number;
     angleStep: number;
+    collisionLifeTime: number;
+    enemiesCount: number;
+    enemyHealth: number;
   };
 };
 
@@ -21,6 +24,9 @@ export const GAME_CONFIG: GameConfigShape = {
   GAME: {
     gravity: 9.8,
     angleStep: 180 / 100,
+    collisionLifeTime: 1000,
+    enemiesCount: 10,
+    enemyHealth: 100,
   },
 };
 

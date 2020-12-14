@@ -3,25 +3,19 @@ import AbstractCannon from '~entity/abstract/AbstractCannon';
 import AbstractMissile from '~entity/abstract/AbstractMissile';
 import AbstractEnemy from '~entity/abstract/AbstractEnemy';
 import AbstractGameInfo from '~entity/abstract/AbstractGameInfo';
-import * as PIXI from 'pixi.js';
 import { PositionShape } from '~interface/entity/PositionInterface';
+import { IGameGraphics } from '~interface/bridge/IGameGraphics';
+import AbstractCollision from '~entity/abstract/AbstractCollision';
 
 class GameObjectsRender implements IGameObjectVisitor {
-  private renderContext: PIXI.Container;
+  private renderContext: IGameGraphics;
 
-  public setRenderContext(renderContext: PIXI.Container) {
+  public setRenderContext(renderContext: IGameGraphics) {
     this.renderContext = renderContext;
   }
 
   private renderTextInfo(text: string, position: PositionShape) {
-    const container = new PIXI.Container();
-    container.setParent(this.renderContext);
-
-    const sprite = new PIXI.Text(text, { fontFamily: 'Arial', fontSize: 13, fill: 0xff1010, textAlign: 'center' });
-    sprite.position.x = position.x;
-    sprite.position.y = position.y - 20;
-
-    container.addChild(sprite);
+    this.renderContext.drawText(text, position);
   }
 
   visitCannon(cannon: AbstractCannon) {
@@ -42,7 +36,14 @@ class GameObjectsRender implements IGameObjectVisitor {
       x: enemy.position.x - enemy.width / 2,
       y: enemy.position.y - enemy.height / 2,
     });
+
+    this.renderTextInfo(`HP: ${enemy.hp}`, {
+      x: enemy.position.x - enemy.width / 2,
+      y: enemy.position.y - enemy.height / 2 + 15,
+    });
   }
+
+  visitCollision(collision: AbstractCollision) {}
 
   visitGameInfo(gameInfo: AbstractGameInfo) {}
 }

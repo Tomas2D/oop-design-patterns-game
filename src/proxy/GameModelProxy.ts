@@ -44,8 +44,8 @@ class GameModelProxy implements IGameModel {
     this.subject.cannonToggleShootingMode();
   }
 
-  async createGameObjects(): Promise<void> {
-    return await this.subject.createGameObjects();
+  createGameObjects() {
+    return this.subject.createGameObjects();
   }
 
   createMemento(): object {
@@ -66,10 +66,6 @@ class GameModelProxy implements IGameModel {
 
   getMovingStrategy(): IMovingStrategy {
     return this.subject.getMovingStrategy();
-  }
-
-  async loadResources(): Promise<unknown> {
-    return await this.subject.loadResources();
   }
 
   move(direction: MoveDirection): void {
@@ -98,6 +94,10 @@ class GameModelProxy implements IGameModel {
 
   update(): void {
     this.subject.update();
+  }
+
+  async loadResources() {
+    return await this.subject.loadResources();
   }
 }
 

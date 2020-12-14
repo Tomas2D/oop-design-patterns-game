@@ -5,8 +5,11 @@ import GameView from './view/GameView';
 import GameController from './controller/GameController';
 import CareTaker from '~memento/CareTaker';
 import IGameModel from '~interface/proxy/IGameModel';
-import GameModel from '~model/GameModel';
+import { GameModel } from '~model/GameModel';
 import GameModelProxy from '~proxy/GameModelProxy';
+import { IGameGraphics } from '~interface/bridge/IGameGraphics';
+import { GameGraphics } from '~interface/bridge/GameGraphics';
+import { PixiGraphics } from '~interface/bridge/PixiGraphics';
 
 class Game {
   private app: PIXI.Application;
@@ -31,22 +34,23 @@ class Game {
     document.getElementById(GAME_CONTAINER_ID_SELECTOR)!.appendChild(this.app.view);
     document.body.style.overflow = 'hidden';
 
-    // MVC
-    this.model = new GameModelProxy(new GameModel(this.app));
-    this.view = new GameView(this.model);
-    this.view.setRenderContext(this.app.stage);
+    const gr: IGameGraphics = new GameGraphics(new PixiGraphics(this.app.stage));
 
+    // MVC
+    this.model = new GameModelProxy(new GameModel(this.app.loader));
+    this.view = new GameView(this.model);
+    this.view.setRenderContext(gr);
     this.controller = this.view.getController();
 
     // Init game objects
-    await this.model.createGameObjects();
+    await this.model.loadResources();
+    this.model.createGameObjects();
 
     // Fire game loop
     this.app.ticker.add(delta => {
       this.controller.processUserInput(); // move with user
       this.model.update(); // move with other game objects
       this.view.render(); // render score?
-      this.app.render();
     });
 
     // CareTaker

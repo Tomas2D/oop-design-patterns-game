@@ -1,14 +1,16 @@
-import { getMoveDirection, isSpacebar } from '../utils';
+import { isSpacebar } from '../utils';
 import IGameModel from '~interface/proxy/IGameModel';
-import { MoveDirection } from '~entity/abstract/GameObject';
 import { MoveCannonUp } from '~command/MoveCannonUp';
 import { MoveCannonDown } from '~command/MoveCannonDown';
-import CareTaker from '~memento/CareTaker';
+import { AimCannonUp } from '~command/AimCannonUp';
+import { CannonPowerUp } from '~command/CannonPowerUp';
+import { CannonPowerDown } from '~command/CannonPowerDown';
+import { AimCannonDown } from '~command/AimCannonDown';
 
 const keysForPressing = ['KeyP', 'KeyW', 'Space'];
 
 class GameController {
-  private model: IGameModel;
+  private readonly model: IGameModel;
   private pressedKeys: string[] = [];
 
   constructor(model: IGameModel) {
@@ -33,23 +35,17 @@ class GameController {
         case 'ArrowDown':
           this.model.registerCommand(new MoveCannonDown(this.model));
           break;
-        // case MoveDirection.LEFT:
-        //   this.model.registerCommand(new MoveCannonUp(this.model));
-        //   break;
-        // case MoveDirection.RIGHT:
-        //   this.model.registerCommand(new MoveCannonUp(this.model));
-        //   break;
         case 'Numpad8':
-          this.model.aimCannonUp();
+          this.model.registerCommand(new AimCannonDown(this.model));
           break;
         case 'Numpad2':
-          this.model.aimCannonDown();
+          this.model.registerCommand(new AimCannonUp(this.model));
           break;
         case 'KeyQ':
-          this.model.cannonPowerUp();
+          this.model.registerCommand(new CannonPowerUp(this.model));
           break;
         case 'KeyW':
-          this.model.cannonPowerDown();
+          this.model.registerCommand(new CannonPowerDown(this.model));
           break;
         case 'KeyP':
           this.model.cannonToggleShootingMode();

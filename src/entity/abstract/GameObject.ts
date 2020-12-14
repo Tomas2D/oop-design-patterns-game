@@ -1,13 +1,20 @@
 import * as PIXI from 'pixi.js';
 import IGameObjectVisitor from '~interface/visitor/IGameObjectVisitor';
 import IVisitable from '~interface/visitor/IVisitable';
+
 export type GameObjectShape = {
   texture: PIXI.Texture;
   x: number;
   y: number;
   speed?: number;
-  hp?: number;
   blockedMoveDirections?: MoveDirection[];
+};
+
+export type GameObjectSizes = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 };
 
 export enum MoveDirection {
@@ -20,6 +27,7 @@ export enum MoveDirection {
 abstract class GameObject extends PIXI.Sprite implements IVisitable {
   protected readonly speed: number;
   protected readonly blockedMoveDirections: Array<MoveDirection>;
+  public shape: PIXI.Rectangle;
 
   constructor(params: GameObjectShape) {
     super(params.texture);

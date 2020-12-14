@@ -1,14 +1,14 @@
 import GameController from '../controller/GameController';
 import GameObjectsRender from '~visitor/GameObjectsRender';
 import IObserver from '../interface/observer/IObserver';
-import * as PIXI from 'pixi.js';
 import IGameModel from '~interface/proxy/IGameModel';
+import { IGameGraphics } from '~interface/bridge/IGameGraphics';
 
 class GameView implements IObserver {
   private readonly controller: GameController;
   private model: IGameModel;
-  private readonly gameObjectVisitor;
-  private visitorRenderContext: PIXI.Container;
+  private readonly gameObjectVisitor: GameObjectsRender;
+  private renderContext: IGameGraphics;
 
   constructor(model: IGameModel) {
     this.model = model;
@@ -17,12 +17,9 @@ class GameView implements IObserver {
     this.model.registerObserver(this);
   }
 
-  public setRenderContext(renderContext: PIXI.Container) {
-    const visitorRenderContext = new PIXI.Container();
-    visitorRenderContext.setParent(renderContext);
-
-    this.visitorRenderContext = visitorRenderContext;
-    this.gameObjectVisitor.setRenderContext(this.visitorRenderContext);
+  public setRenderContext(renderContext: IGameGraphics) {
+    this.renderContext = renderContext;
+    this.gameObjectVisitor.setRenderContext(this.renderContext);
   }
 
   public getController() {
@@ -31,7 +28,8 @@ class GameView implements IObserver {
 
   public render() {
     // clear context
-    this.visitorRenderContext.removeChildren();
+    this.renderContext.removeChildren();
+    this.renderContext.addChild(...this.model.getGameObjects());
 
     this.model.getGameObjects().forEach(obj => {
       obj.acceptVisitor(this.gameObjectVisitor);
