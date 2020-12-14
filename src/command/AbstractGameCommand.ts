@@ -1,4 +1,4 @@
-import IGameModel from '~interface/proxy/IGameModel';
+import IGameModel from '~proxy/IGameModel';
 
 export abstract class AbstractGameCommand {
   protected subject: IGameModel;
@@ -6,12 +6,12 @@ export abstract class AbstractGameCommand {
 
   protected abstract execute(): void;
 
-  public doExecute(): void {
+  doExecute(): void {
     this.memento = this.subject.createMemento();
     this.execute();
   }
 
-  public unExecute(): void {
+  unExecute(): void {
     this.subject.setMemento(this.memento);
   }
 }

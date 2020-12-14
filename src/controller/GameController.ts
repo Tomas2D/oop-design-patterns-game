@@ -1,5 +1,5 @@
-import { isSpacebar } from '../utils';
-import IGameModel from '~interface/proxy/IGameModel';
+import { isSpacebar } from '~utils';
+import IGameModel from '~proxy/IGameModel';
 import { MoveCannonUp } from '~command/MoveCannonUp';
 import { MoveCannonDown } from '~command/MoveCannonDown';
 import { AimCannonUp } from '~command/AimCannonUp';
@@ -7,7 +7,7 @@ import { CannonPowerUp } from '~command/CannonPowerUp';
 import { CannonPowerDown } from '~command/CannonPowerDown';
 import { AimCannonDown } from '~command/AimCannonDown';
 
-const keysForPressing = ['KeyP', 'KeyW', 'Space'];
+const keysForPressing = ['KeyP', 'KeyW', 'Space', 'KeyU', 'KeyI'];
 
 class GameController {
   private readonly model: IGameModel;
@@ -21,7 +21,7 @@ class GameController {
   /**
    * Make action based on inputs in queue
    */
-  public processUserInput() {
+  processUserInput() {
     this.pressedKeys.forEach(key => {
       if (isSpacebar(key)) {
         this.model.cannonShoot();
@@ -36,10 +36,10 @@ class GameController {
           this.model.registerCommand(new MoveCannonDown(this.model));
           break;
         case 'Numpad8':
-          this.model.registerCommand(new AimCannonDown(this.model));
+          this.model.registerCommand(new AimCannonUp(this.model));
           break;
         case 'Numpad2':
-          this.model.registerCommand(new AimCannonUp(this.model));
+          this.model.registerCommand(new AimCannonDown(this.model));
           break;
         case 'KeyQ':
           this.model.registerCommand(new CannonPowerUp(this.model));
@@ -47,13 +47,17 @@ class GameController {
         case 'KeyW':
           this.model.registerCommand(new CannonPowerDown(this.model));
           break;
+        case 'KeyU':
+          this.model.cannonPowerUp();
+          break;
+        case 'KeyI':
+          this.model.cannonPowerDown();
+          break;
         case 'KeyP':
           this.model.cannonToggleShootingMode();
           break;
         case 'KeyB':
           this.model.undoLastCommand();
-          break;
-        default:
           break;
       }
     });

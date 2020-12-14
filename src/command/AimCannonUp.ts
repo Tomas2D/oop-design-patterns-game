@@ -1,6 +1,6 @@
 import { AbstractGameCommand } from '~command/AbstractGameCommand';
-import IGameModel from '~interface/proxy/IGameModel';
-import { MoveDirection } from '~entity/abstract/GameObject';
+import IGameModel from '~proxy/IGameModel';
+import { MoveDirection } from '~abstract-factory/entity/GameObject';
 
 export class AimCannonUp extends AbstractGameCommand {
   constructor(subject: IGameModel) {

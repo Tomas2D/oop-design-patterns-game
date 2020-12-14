@@ -1,19 +1,19 @@
-import IMovingStrategy from '~interface/strategy/IMovingStrategy';
-import AbstractMissile from '~entity/abstract/AbstractMissile';
+import IMovingStrategy from '~strategy/IMovingStrategy';
+import AbstractMissile from '~abstract-factory/entity/AbstractMissile';
 import { GAME_CONFIG } from '~config';
-
-const { gravity } = GAME_CONFIG.GAME;
+import { timeout } from 'q';
 
 class RealisticMovingStrategy implements IMovingStrategy {
   updatePosition(missile: AbstractMissile) {
-    const initVelocity = missile.getInitVelocity();
-    const initAngle = missile.getInitAngle() * 0.0174532925;
     const time = missile.getAge();
 
-    const x = initVelocity * time * Math.cos(initAngle);
-    const y = 0.5 * gravity * time * time - initVelocity * time * Math.sin(initAngle);
+    const velocity = missile.getInitVelocity();
+    const initAngle = -1 * missile.getInitAngle() * (Math.PI / 180);
 
-    missile.setPosition(x + missile.x, y + missile.y);
+    const dx = velocity * Math.cos(initAngle);
+    const dy = velocity * Math.sin(initAngle) - time * GAME_CONFIG.GAME.gravity;
+
+    missile.setPosition(missile.x + dx, missile.y - dy);
   }
 }
 

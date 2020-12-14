@@ -1,9 +1,10 @@
-import IGameModel from '~interface/proxy/IGameModel';
-import { PositionShape } from '~interface/entity/PositionInterface';
-import GameObject, { MoveDirection } from '~entity/abstract/GameObject';
-import IMovingStrategy from '~interface/strategy/IMovingStrategy';
-import IObserver from '~interface/observer/IObserver';
+import IGameModel from '~proxy/IGameModel';
+import GameObject, { MoveDirection } from '~abstract-factory/entity/GameObject';
+import IMovingStrategy from '~strategy/IMovingStrategy';
 import { AbstractGameCommand } from '~command/AbstractGameCommand';
+import { IPosition } from '~abstract-factory/entity/IPosition';
+import IObserver from '~observer/IObserver';
+import AbstractGameInfo from '~abstract-factory/entity/AbstractGameInfo';
 
 class GameModelProxy implements IGameModel {
   private subject: IGameModel;
@@ -56,7 +57,7 @@ class GameModelProxy implements IGameModel {
     this.subject.destroyMissiles();
   }
 
-  generateEnemyPosition(): PositionShape {
+  generateEnemyPosition(): IPosition {
     return this.subject.generateEnemyPosition();
   }
 
@@ -98,6 +99,14 @@ class GameModelProxy implements IGameModel {
 
   async loadResources() {
     return await this.subject.loadResources();
+  }
+
+  getGameInfo(): AbstractGameInfo {
+    return this.subject.getGameInfo();
+  }
+
+  getLevel(): number {
+    return this.subject.getLevel();
   }
 }
 

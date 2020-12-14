@@ -1,28 +1,29 @@
-import Cannon_A from '~entity/familyA/Cannon_A';
-import Missile_A from '~entity/familyA/Missile_A';
 import BaseGameObjectsFactory from '~abstract-factory/BaseGameObjectsFactory';
-import { PositionShape } from '~interface/entity/PositionInterface';
-import AbstractGameInfo from '~entity/abstract/AbstractGameInfo';
-import Enemy_A from '~entity/familyA/Enemy_A';
-import GameInfo_A from '~entity/familyA/GameInfo_A';
-import AbstractEnemy from '~entity/abstract/AbstractEnemy';
-import AbstractCollision from '~entity/abstract/AbstractCollision';
-import { EnemyType } from '~interface/abstract-factory/IGameObjectFactory';
+import AbstractGameInfo from '~abstract-factory/entity/AbstractGameInfo';
+import AbstractEnemy from '~abstract-factory/entity/AbstractEnemy';
+import AbstractCollision from '~abstract-factory/entity/AbstractCollision';
+import { EnemyType } from '~abstract-factory/IGameObjectFactory';
+import Cannon_A from '~abstract-factory/entity/familyA/Cannon_A';
+import { IPosition } from '~abstract-factory/entity/IPosition';
+import Enemy_A from '~abstract-factory/entity/familyA/Enemy_A';
+import GameInfo_A from '~abstract-factory/entity/familyA/GameInfo_A';
+import Missile_A from '~abstract-factory/entity/familyA/Missile_A';
+import { GAME_CONFIG } from '~config';
 
 class GameObjectsFactory_A extends BaseGameObjectsFactory {
-  public createCannon(): Cannon_A {
+  createCannon(): Cannon_A {
     return new Cannon_A(
       {
         texture: this.loader.resources['cannon'].texture,
         x: 50,
-        y: 50,
+        y: 150,
         speed: 6,
       },
       this,
     );
   }
 
-  public createMissile(position: PositionShape, angle: number, velocity: number): Missile_A {
+  createMissile(position: IPosition, angle: number, velocity: number): Missile_A {
     return new Missile_A(
       {
         texture: this.loader.resources['missile'].texture,
@@ -35,19 +36,27 @@ class GameObjectsFactory_A extends BaseGameObjectsFactory {
     );
   }
 
-  public createEnemy(position: PositionShape, type: EnemyType = EnemyType.A): AbstractEnemy {
+  createEnemy(position: IPosition, type: EnemyType = EnemyType.A): AbstractEnemy {
+    const level = this.gameModel.getLevel();
+
     return new Enemy_A({
       texture: this.loader.resources[`enemy${type}`].texture,
-      speed: 3,
+      speed: GAME_CONFIG.GAME.enemySpeed + level - 1,
       ...position,
     });
   }
 
-  public createGameInfo(): AbstractGameInfo {
-    return new GameInfo_A();
+  createGameInfo(): AbstractGameInfo {
+    const obj = new GameInfo_A('', {
+      fontFamily: 'Arial',
+      fontSize: 16,
+      fill: 0xffff00,
+    });
+    obj.position.set(5, 5);
+    return obj;
   }
 
-  public createCollision(position: PositionShape): AbstractCollision {
+  createCollision(position: IPosition): AbstractCollision {
     return new AbstractCollision({
       texture: this.loader.resources['collision'].texture,
       speed: 0,

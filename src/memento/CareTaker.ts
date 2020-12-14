@@ -1,4 +1,4 @@
-import IGameModel from '~interface/proxy/IGameModel';
+import IGameModel from '~proxy/IGameModel';
 
 class CareTaker {
   private gameModel: IGameModel;
@@ -8,16 +8,15 @@ class CareTaker {
     static INSTANCE: CareTaker = new CareTaker();
   };
 
-  public static getInstance(): CareTaker {
+  static getInstance(): CareTaker {
     return this.SingletonHolder.INSTANCE;
   }
 
-  public setModel(gameModel: IGameModel) {
+  setModel(gameModel: IGameModel) {
     this.gameModel = gameModel;
   }
 
-  public createMemento(): object {
-    // TODO: use commands
+  createMemento(): object {
     if (this.gameModel !== null) {
       const memento = this.gameModel.createMemento();
       this.mementos.push(memento);
@@ -27,9 +26,12 @@ class CareTaker {
     return null;
   }
 
-  public setMemento(memento: object) {
+  setLastMemento() {
     if (this.gameModel !== null) {
-      this.gameModel.setMemento(memento);
+      if (this.mementos.length > 0) {
+        const lastMemento = this.mementos[this.mementos.length - 1];
+        this.gameModel.setMemento(lastMemento);
+      }
     }
   }
 }

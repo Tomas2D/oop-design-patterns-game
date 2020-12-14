@@ -1,12 +1,12 @@
-import IGameObjectFactory, { EnemyType } from '~interface/abstract-factory/IGameObjectFactory';
-import { PositionShape } from '~interface/entity/PositionInterface';
-import IGameModel from '~interface/proxy/IGameModel';
+import IGameObjectFactory, { EnemyType } from '~abstract-factory/IGameObjectFactory';
+import IGameModel from '~proxy/IGameModel';
+import { IPosition } from '~abstract-factory/entity/IPosition';
 
 abstract class BaseGameObjectsFactory implements IGameObjectFactory {
   protected readonly loader: PIXI.Loader;
   protected readonly gameModel: IGameModel;
 
-  public constructor(loader: PIXI.Loader, gameModel: IGameModel) {
+  constructor(loader: PIXI.Loader, gameModel: IGameModel) {
     this.loader = loader;
     this.gameModel = gameModel;
   }
@@ -15,13 +15,13 @@ abstract class BaseGameObjectsFactory implements IGameObjectFactory {
 
   abstract createCannon();
 
-  abstract createMissile(position: PositionShape, angle: Number, velocity: Number);
+  abstract createMissile(position: IPosition, angle: Number, velocity: Number);
 
-  abstract createEnemy(position: PositionShape, type: EnemyType);
+  abstract createEnemy(position: IPosition, type: EnemyType);
 
   abstract createGameInfo();
 
-  abstract createCollision(position: PositionShape);
+  abstract createCollision(position: IPosition);
 }
 
 export default BaseGameObjectsFactory;

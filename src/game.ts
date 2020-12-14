@@ -4,12 +4,12 @@ import { GAME_CONFIG, GAME_CONTAINER_ID_SELECTOR } from './config';
 import GameView from './view/GameView';
 import GameController from './controller/GameController';
 import CareTaker from '~memento/CareTaker';
-import IGameModel from '~interface/proxy/IGameModel';
+import IGameModel from '~proxy/IGameModel';
 import { GameModel } from '~model/GameModel';
 import GameModelProxy from '~proxy/GameModelProxy';
-import { IGameGraphics } from '~interface/bridge/IGameGraphics';
-import { GameGraphics } from '~interface/bridge/GameGraphics';
-import { PixiGraphics } from '~interface/bridge/PixiGraphics';
+import { PixiGraphics } from '~bridge/PixiGraphics';
+import { GameGraphics } from '~bridge/GameGraphics';
+import { IGameGraphics } from '~bridge/IGameGraphics';
 
 class Game {
   private app: PIXI.Application;
@@ -21,8 +21,8 @@ class Game {
   /**
    * Init MVC
    */
-  public async init() {
-    // Prepare Pixi
+  async init() {
+    // Init framework
     this.app = new PIXI.Application(GAME_CONFIG.PIXI);
     this.app.stage.hitArea = new PIXI.Rectangle(
       0,
@@ -34,6 +34,7 @@ class Game {
     document.getElementById(GAME_CONTAINER_ID_SELECTOR)!.appendChild(this.app.view);
     document.body.style.overflow = 'hidden';
 
+    // Init graphic
     const gr: IGameGraphics = new GameGraphics(new PixiGraphics(this.app.stage));
 
     // MVC
@@ -47,13 +48,17 @@ class Game {
     this.model.createGameObjects();
 
     // Fire game loop
-    this.app.ticker.add(delta => {
+    this.app.ticker.maxFPS = 60;
+
+    this.app.ticker.add(() => {
       this.controller.processUserInput(); // move with user
       this.model.update(); // move with other game objects
-      this.view.render(); // render score?
+      this.view.render();
     });
 
-    // CareTaker
+    this.app.ticker.start();
+
+    // CareTaker (Singleton)
     CareTaker.getInstance().setModel(this.model);
   }
 }

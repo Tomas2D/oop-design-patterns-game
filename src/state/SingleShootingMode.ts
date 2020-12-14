@@ -1,5 +1,5 @@
-import IShootingMode from '~interface/state/IShootingMode';
-import AbstractCannon from '~entity/abstract/AbstractCannon';
+import IShootingMode from '~state/IShootingMode';
+import AbstractCannon from '~abstract-factory/entity/AbstractCannon';
 
 class SingleShootingMode implements IShootingMode {
   getName(): string {

@@ -1,5 +1,5 @@
-import IMovingStrategy from '~interface/strategy/IMovingStrategy';
-import AbstractMissile from '~entity/abstract/AbstractMissile';
+import IMovingStrategy from '~strategy/IMovingStrategy';
+import AbstractMissile from '~abstract-factory/entity/AbstractMissile';
 
 class SimpleMovingStrategy implements IMovingStrategy {
   updatePosition(missile: AbstractMissile) {

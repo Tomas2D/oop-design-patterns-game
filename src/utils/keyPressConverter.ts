@@ -1,4 +1,4 @@
-import { MoveDirection } from '../entity/abstract/GameObject';
+import { MoveDirection } from '../abstract-factory/entity/GameObject';
 
 export const allowedKeysForMove = {
   ArrowLeft: MoveDirection.LEFT,

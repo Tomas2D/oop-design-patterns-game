@@ -1,42 +1,41 @@
 import GameController from '../controller/GameController';
 import GameObjectsRender from '~visitor/GameObjectsRender';
-import IObserver from '../interface/observer/IObserver';
-import IGameModel from '~interface/proxy/IGameModel';
-import { IGameGraphics } from '~interface/bridge/IGameGraphics';
+import IObserver from '../observer/IObserver';
+import IGameModel from '~proxy/IGameModel';
+import { IGameGraphics } from '~bridge/IGameGraphics';
 
 class GameView implements IObserver {
   private readonly controller: GameController;
+  private readonly gameObjectRenderer: GameObjectsRender;
+
   private model: IGameModel;
-  private readonly gameObjectVisitor: GameObjectsRender;
   private renderContext: IGameGraphics;
 
   constructor(model: IGameModel) {
     this.model = model;
-    this.gameObjectVisitor = new GameObjectsRender();
+    this.gameObjectRenderer = new GameObjectsRender();
     this.controller = new GameController(model);
     this.model.registerObserver(this);
   }
 
-  public setRenderContext(renderContext: IGameGraphics) {
+  setRenderContext(renderContext: IGameGraphics) {
     this.renderContext = renderContext;
-    this.gameObjectVisitor.setRenderContext(this.renderContext);
+    this.gameObjectRenderer.setRenderContext(this.renderContext);
   }
 
-  public getController() {
+  getController() {
     return this.controller;
   }
 
-  public render() {
-    // clear context
-    this.renderContext.removeChildren();
-    this.renderContext.addChild(...this.model.getGameObjects());
-
+  render() {
     this.model.getGameObjects().forEach(obj => {
-      obj.acceptVisitor(this.gameObjectVisitor);
+      obj.acceptVisitor(this.gameObjectRenderer);
     });
+
+    this.model.getGameInfo().acceptVisitor(this.gameObjectRenderer);
   }
 
-  public update(): void {
+  update(): void {
     this.render();
   }
 }
