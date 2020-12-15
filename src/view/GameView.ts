@@ -3,6 +3,7 @@ import GameObjectsRender from '~visitor/GameObjectsRender';
 import IObserver from '../observer/IObserver';
 import IGameModel from '~proxy/IGameModel';
 import { IGameGraphics } from '~bridge/IGameGraphics';
+import { IObserverEvent } from '~observer/IObserverEvent';
 
 class GameView implements IObserver {
   private readonly controller: GameController;
@@ -35,7 +36,13 @@ class GameView implements IObserver {
     this.model.getGameInfo().acceptVisitor(this.gameObjectRenderer);
   }
 
-  update(): void {
+  update(e?: IObserverEvent): void {
+    if (e?.updateGame) {
+      this.renderContext.removeChildren();
+      this.model.getGameObjects().forEach(obj => {
+        obj.removeChildren();
+      });
+    }
     this.render();
   }
 }

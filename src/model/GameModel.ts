@@ -18,13 +18,17 @@ import { Queue } from 'queue-typescript';
 import { Stack } from 'stack-typescript';
 import AbstractCollision from '~abstract-factory/entity/AbstractCollision';
 import { IPosition } from '~abstract-factory/entity/IPosition';
-import CareTaker from '~memento/CareTaker';
+import { IObserverEvent } from '~observer/IObserverEvent';
 
 // As there is no export, it is like Java private class
 class Memento {
+  gameInfo: AbstractGameInfo;
+  enemies: AbstractEnemy[];
+  cannon: AbstractCannon;
+  missiles: AbstractMissile[];
+  collisions: AbstractCollision[];
+
   score: number;
-  cannonX: number;
-  cannonY: number;
   level: number;
 }
 
@@ -55,7 +59,8 @@ export class GameModel implements IGameModel {
   /* Strategies */
   private readonly movingStrategy: IMovingStrategy;
 
-  private enemiesMovingTime = 0;
+  /* Set enemies moving on the screen */
+  private enemiesMovingSet = false;
 
   constructor(loader?: Loader) {
     this.loader = loader || new PIXI.Loader();
@@ -89,8 +94,8 @@ export class GameModel implements IGameModel {
     this.createEnemies(enemiesCount);
   }
 
-  notifyObservers(): void {
-    this.observers.forEach(observer => observer.update());
+  notifyObservers(e?: IObserverEvent): void {
+    this.observers.forEach(observer => observer.update(e));
   }
 
   registerObserver(obs: IObserver): void {
@@ -118,7 +123,7 @@ export class GameModel implements IGameModel {
     if (this.enemies.length === 0) {
       this.createEnemies(GAME_CONFIG.GAME.enemiesCount);
       this.level++;
-      this.enemiesMovingTime = 0;
+      this.enemiesMovingSet = false;
     }
 
     this.updateGameInfo();
@@ -132,7 +137,9 @@ export class GameModel implements IGameModel {
   }
 
   moveEnemies() {
-    if (this.enemiesMovingTime === 0) {
+    if (!this.enemiesMovingSet) {
+      this.enemiesMovingSet = true;
+
       this.enemies.forEach(enemy => {
         const random = Math.random();
         let direction;
@@ -153,15 +160,9 @@ export class GameModel implements IGameModel {
 
         enemy.setMovingDirection(direction);
       });
-      this.enemiesMovingTime = Date.now();
     }
 
-    let diff = Date.now() - this.enemiesMovingTime;
-    if (diff) {
-      this.enemies.forEach(enemy => enemy.move());
-    } else {
-      // this.enemiesMovingTime = 0;
-    }
+    this.enemies.forEach(enemy => enemy.move());
   }
 
   destroyMissiles() {
@@ -292,9 +293,14 @@ export class GameModel implements IGameModel {
 
   createMemento(): object {
     const m = new Memento();
+
+    m.enemies = this.enemies.map(enemy => enemy.clone());
+    m.cannon = this.cannon.clone();
+    m.gameInfo = this.gameInfo.clone();
+    m.missiles = this.missiles.map(missile => missile.clone());
+    m.collisions = this.collisions.map(collision => collision.clone());
+
     m.score = this.score;
-    m.cannonX = this.cannon.x;
-    m.cannonY = this.cannon.y;
     m.level = this.level;
 
     return m;
@@ -303,10 +309,22 @@ export class GameModel implements IGameModel {
   setMemento(memento: object) {
     const m: Memento = memento as Memento;
 
+    this.getGameObjects().forEach(() => obj => obj.destroy());
+    this.enemies.length = 0;
+    this.missiles.length = 0;
+    this.collisions.length = 0;
+
+    this.enemies = m.enemies.slice();
+    this.missiles = m.missiles.slice();
+    this.collisions = m.collisions.slice();
+    this.gameInfo = m.gameInfo.clone();
+    this.cannon = m.cannon;
+
     this.score = m.score;
-    this.cannon.position.set(m.cannonX, m.cannonY);
     this.level = m.level;
 
+    this.missiles.forEach(missile => missile.resetBornAt());
+    this.notifyObservers({ updateGame: true });
     this.update();
   }
 
@@ -325,8 +343,6 @@ export class GameModel implements IGameModel {
 
     const command = this.executedCommands.pop();
     command.unExecute();
-
-    this.notifyObservers();
   }
 
   private executeCommands(): void {

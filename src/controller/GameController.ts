@@ -6,8 +6,9 @@ import { AimCannonUp } from '~command/AimCannonUp';
 import { CannonPowerUp } from '~command/CannonPowerUp';
 import { CannonPowerDown } from '~command/CannonPowerDown';
 import { AimCannonDown } from '~command/AimCannonDown';
+import { CannonShoot } from '~command/CannonShoot';
 
-const keysForPressing = ['KeyP', 'KeyW', 'Space', 'KeyU', 'KeyI'];
+const keysForPressing = ['KeyP', 'KeyW', 'Space', 'KeyU', 'KeyI', 'KeyB'];
 
 class GameController {
   private readonly model: IGameModel;
@@ -24,7 +25,7 @@ class GameController {
   processUserInput() {
     this.pressedKeys.forEach(key => {
       if (isSpacebar(key)) {
-        this.model.cannonShoot();
+        this.model.registerCommand(new CannonShoot(this.model));
         return;
       }
 

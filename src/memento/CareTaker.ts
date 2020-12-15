@@ -1,8 +1,12 @@
 import IGameModel from '~proxy/IGameModel';
+import { GAME_CONFIG } from '~config';
 
+/**
+ * Implemented as Singleton
+ */
 class CareTaker {
   private gameModel: IGameModel;
-  private mementos: object[] = [];
+  //private mementos: object[] = [];
 
   private static SingletonHolder = class {
     static INSTANCE: CareTaker = new CareTaker();
@@ -19,19 +23,31 @@ class CareTaker {
   createMemento(): object {
     if (this.gameModel !== null) {
       const memento = this.gameModel.createMemento();
-      this.mementos.push(memento);
+      /*this.mementos.push(memento);
 
+      if (this.mementos.length > GAME_CONFIG.GAME.maxMementos) {
+        this.mementos.shift();
+        // this.mementos.splice(0, this.mementos.length - GAME_CONFIG.GAME.maxMementos);
+      }
+
+      console.info(this.mementos.length);*/
       return memento;
     }
     return null;
   }
 
-  setLastMemento() {
+  /*setLastMemento() {
     if (this.gameModel !== null) {
       if (this.mementos.length > 0) {
         const lastMemento = this.mementos[this.mementos.length - 1];
         this.gameModel.setMemento(lastMemento);
       }
+    }
+  }*/
+
+  setMemento(memento: object) {
+    if (this.gameModel !== null) {
+      this.gameModel.setMemento(memento);
     }
   }
 }

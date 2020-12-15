@@ -18,6 +18,7 @@ export type GameConfigShape = {
     enemySpeed: number;
     minEnemySpawnOffset: number;
     statusBarHeight: number;
+    maxMementos: number;
   };
 };
 
@@ -33,13 +34,15 @@ export const GAME_CONFIG: GameConfigShape = {
     gravity: 9.8,
     angleStep: 180 / 100,
     collisionLifeTime: 1000,
-    enemiesCount: 250,
+    enemiesCount: 5,
     enemyHealth: 100,
     cannonPower: 10,
     enemySpeed: 1,
 
     minEnemySpawnOffset: 200,
     statusBarHeight: 30,
+
+    maxMementos: 10,
   },
 };
 

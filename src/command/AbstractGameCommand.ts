@@ -1,4 +1,5 @@
 import IGameModel from '~proxy/IGameModel';
+import CareTaker from '~memento/CareTaker';
 
 export abstract class AbstractGameCommand {
   protected subject: IGameModel;
@@ -7,11 +8,11 @@ export abstract class AbstractGameCommand {
   protected abstract execute(): void;
 
   doExecute(): void {
-    this.memento = this.subject.createMemento();
+    this.memento = CareTaker.getInstance().createMemento();
     this.execute();
   }
 
   unExecute(): void {
-    this.subject.setMemento(this.memento);
+    CareTaker.getInstance().setMemento(this.memento);
   }
 }

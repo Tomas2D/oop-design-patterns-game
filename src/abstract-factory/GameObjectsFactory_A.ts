@@ -9,6 +9,7 @@ import Enemy_A from '~abstract-factory/entity/familyA/Enemy_A';
 import GameInfo_A from '~abstract-factory/entity/familyA/GameInfo_A';
 import Missile_A from '~abstract-factory/entity/familyA/Missile_A';
 import { GAME_CONFIG } from '~config';
+import Collision_A from '~abstract-factory/entity/familyA/Collision_A';
 
 class GameObjectsFactory_A extends BaseGameObjectsFactory {
   createCannon(): Cannon_A {
@@ -57,7 +58,7 @@ class GameObjectsFactory_A extends BaseGameObjectsFactory {
   }
 
   createCollision(position: IPosition): AbstractCollision {
-    return new AbstractCollision({
+    return new Collision_A({
       texture: this.loader.resources['collision'].texture,
       speed: 0,
       ...position,

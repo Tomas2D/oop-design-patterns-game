@@ -1,11 +1,11 @@
-import { GameObjectPrototype } from '~abstract-factory/entity/GameObjectPrototype';
 import { GameObjectShape, MoveDirection } from '~abstract-factory/entity/GameObject';
 import { GAME_CONFIG } from '~config';
 import IVisitor from '~visitor/IVisitor';
+import { CloneableGameObjectPrototype } from '~abstract-factory/entity/CloneableGameObjectPrototype';
 
-class AbstractEnemy extends GameObjectPrototype {
-  private hp: number;
-  private direction: MoveDirection;
+abstract class AbstractEnemy extends CloneableGameObjectPrototype {
+  protected hp: number;
+  protected direction: MoveDirection;
 
   constructor(params: GameObjectShape, hp: number = GAME_CONFIG.GAME.enemyHealth) {
     super(params);
@@ -47,23 +47,6 @@ class AbstractEnemy extends GameObjectPrototype {
     }
   }
 
-  // Prototype pattern
-  clone(): AbstractEnemy {
-    const enemy = new AbstractEnemy(
-      {
-        x: this.x,
-        y: this.y,
-        texture: this.texture,
-        blockedMoveDirections: this.blockedMoveDirections.slice(),
-        speed: this.speed,
-      },
-      this.hp,
-    );
-
-    enemy.anchor = this.anchor.clone();
-    return enemy;
-  }
-
   hitEnemy(power: number) {
     this.hp -= power;
     if (this.hp <= 0) {
@@ -74,6 +57,8 @@ class AbstractEnemy extends GameObjectPrototype {
   getHp() {
     return this.hp;
   }
+
+  abstract clone();
 }
 
 export default AbstractEnemy;

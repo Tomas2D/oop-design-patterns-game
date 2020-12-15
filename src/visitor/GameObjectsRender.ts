@@ -77,7 +77,7 @@ class GameObjectsRender implements IVisitor {
       );
 
       this.renderTextInfo(
-        `HP: ${enemy.hp}`,
+        `HP: ${enemy.getHp()}`,
         {
           x: 0,
           y: 0,

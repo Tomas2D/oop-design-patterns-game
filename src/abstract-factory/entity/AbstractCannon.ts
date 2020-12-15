@@ -1,4 +1,4 @@
-import GameObject, { GameObjectShape, MoveDirection } from './GameObject';
+import { GameObjectShape, MoveDirection } from './GameObject';
 import AbstractMissile from '~abstract-factory/entity/AbstractMissile';
 import IGameObjectFactory from '~abstract-factory/IGameObjectFactory';
 import { GAME_CONFIG } from '~config';
@@ -6,19 +6,21 @@ import IShootingMode from '~state/IShootingMode';
 import SingleShootingMode from '~state/SingleShootingMode';
 import DoubleShootingMode from '~state/DoubleShootingMode';
 import IVisitor from '~visitor/IVisitor';
+import { CloneableGameObjectPrototype } from '~abstract-factory/entity/CloneableGameObjectPrototype';
 
-abstract class AbstractCannon extends GameObject {
-  private power: number = GAME_CONFIG.GAME.cannonPower;
+abstract class AbstractCannon extends CloneableGameObjectPrototype {
+  protected power: number = GAME_CONFIG.GAME.cannonPower;
   protected gameObjectFactory: IGameObjectFactory;
   protected shootingMode: IShootingMode;
 
   abstract shoot(): AbstractMissile[];
+
   abstract primitiveShoot(): void;
 
   protected static SINGLE_SHOOTING_MODE = new SingleShootingMode();
   protected static DOUBLE_SHOOTING_MODE = new DoubleShootingMode();
 
-  constructor(params: GameObjectShape, factory: IGameObjectFactory) {
+  constructor(params: GameObjectShape | PIXI.Sprite, factory: IGameObjectFactory) {
     super({
       ...params,
       blockedMoveDirections: [MoveDirection.LEFT, MoveDirection.RIGHT],
@@ -35,7 +37,7 @@ abstract class AbstractCannon extends GameObject {
     const newY = this.y;
 
     // Prevent going out of bound
-    if (newY < this.height || newY > GAME_CONFIG.PIXI.height - this.height / 2) {
+    if (newY < this.height / 2 + GAME_CONFIG.GAME.statusBarHeight || newY > GAME_CONFIG.PIXI.height - this.height / 2) {
       this.y = oldY;
     }
   }
@@ -91,6 +93,8 @@ abstract class AbstractCannon extends GameObject {
   getShootingMode() {
     return this.shootingMode;
   }
+
+  abstract clone();
 }
 
 export default AbstractCannon;

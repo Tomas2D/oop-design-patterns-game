@@ -47,6 +47,9 @@ class Game {
     await this.model.loadResources();
     this.model.createGameObjects();
 
+    // CareTaker (Singleton)
+    CareTaker.getInstance().setModel(this.model);
+
     // Fire game loop
     this.app.ticker.maxFPS = 60;
 
@@ -57,9 +60,6 @@ class Game {
     });
 
     this.app.ticker.start();
-
-    // CareTaker (Singleton)
-    CareTaker.getInstance().setModel(this.model);
   }
 }
 

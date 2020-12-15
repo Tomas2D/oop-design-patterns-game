@@ -2,8 +2,8 @@ import LifeTimeLimitedGameObject from '~abstract-factory/entity/LifeTimeLimitedG
 import IVisitor from '~visitor/IVisitor';
 
 abstract class AbstractMissile extends LifeTimeLimitedGameObject {
-  private initAngle: number;
-  private initVelocity: number;
+  protected initAngle: number;
+  protected initVelocity: number;
 
   constructor(params, initAngle: number, initVelocity: number) {
     super(params);

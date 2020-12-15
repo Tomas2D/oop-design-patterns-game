@@ -1,5 +1,7 @@
+import { IObserverEvent } from '~observer/IObserverEvent';
+
 interface IObserver {
-  update(): void;
+  update(e: IObserverEvent): void;
 }
 
 export default IObserver;

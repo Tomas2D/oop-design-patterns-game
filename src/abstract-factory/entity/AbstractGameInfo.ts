@@ -1,7 +1,8 @@
 import * as PIXI from 'pixi.js';
 import IVisitor from '~visitor/IVisitor';
+import { ICloneable } from '~prototype/ICloneable';
 
-abstract class AbstractGameInfo extends PIXI.Text {
+abstract class AbstractGameInfo extends PIXI.Text implements ICloneable {
   abstract getText(): string;
 
   protected enemiesLeft = 0;
@@ -23,6 +24,8 @@ abstract class AbstractGameInfo extends PIXI.Text {
   acceptVisitor(visitor: IVisitor) {
     visitor.visitGameInfo(this);
   }
+
+  abstract clone();
 }
 
 export default AbstractGameInfo;

@@ -1,8 +1,8 @@
-import GameObject from '~abstract-factory/entity/GameObject';
 import IVisitor from '~visitor/IVisitor';
+import { CloneableGameObjectPrototype } from '~abstract-factory/entity/CloneableGameObjectPrototype';
 
-abstract class LifeTimeLimitedGameObject extends GameObject {
-  private readonly bornAt: number;
+abstract class LifeTimeLimitedGameObject extends CloneableGameObjectPrototype {
+  private bornAt: number;
 
   constructor(params) {
     super(params);
@@ -13,7 +13,13 @@ abstract class LifeTimeLimitedGameObject extends GameObject {
     return (Date.now() - this.bornAt) / 1000;
   }
 
+  resetBornAt(): void {
+    this.bornAt = Date.now();
+  }
+
   abstract acceptVisitor(visitor: IVisitor);
+
+  abstract clone();
 }
 
 export default LifeTimeLimitedGameObject;
