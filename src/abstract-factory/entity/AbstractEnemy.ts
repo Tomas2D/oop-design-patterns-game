@@ -2,14 +2,25 @@ import { GameObjectShape, MoveDirection } from '~abstract-factory/entity/GameObj
 import { GAME_CONFIG } from '~config';
 import IVisitor from '~visitor/IVisitor';
 import { CloneableGameObjectPrototype } from '~abstract-factory/entity/CloneableGameObjectPrototype';
+import { default as sound } from 'pixi-sound';
 
 abstract class AbstractEnemy extends CloneableGameObjectPrototype {
   protected hp: number;
   protected direction: MoveDirection;
 
-  constructor(params: GameObjectShape, hp: number = GAME_CONFIG.GAME.enemyHealth) {
+  protected hitSound: sound.Sound;
+  protected killSound: sound.Sound;
+
+  constructor(
+    params: GameObjectShape,
+    hitSound: sound.Sound,
+    killSound: sound.Sound,
+    hp: number = GAME_CONFIG.GAME.enemyHealth,
+  ) {
     super(params);
     this.hp = hp;
+    this.hitSound = hitSound;
+    this.killSound = killSound;
   }
 
   acceptVisitor(visitor: IVisitor) {
@@ -50,7 +61,10 @@ abstract class AbstractEnemy extends CloneableGameObjectPrototype {
   hitEnemy(power: number) {
     this.hp -= power;
     if (this.hp <= 0) {
+      this.killSound.play();
       this.hp = 0;
+    } else {
+      this.hitSound.play();
     }
   }
 

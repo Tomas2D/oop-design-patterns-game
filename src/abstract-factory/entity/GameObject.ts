@@ -27,7 +27,6 @@ export enum MoveDirection {
 abstract class GameObject extends PIXI.Sprite implements IVisitable {
   protected readonly speed: number;
   protected readonly blockedMoveDirections: Array<MoveDirection>;
-  shape: PIXI.Rectangle;
 
   constructor(params: GameObjectShape) {
     super(params.texture);

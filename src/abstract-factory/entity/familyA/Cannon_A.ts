@@ -22,6 +22,14 @@ class Cannon_A extends AbstractCannon {
     this.shootingBatch.length = 0;
     this.shootingMode.shoot(this);
 
+    // Delay sounds when multishooting
+    Array(this.shootingBatch.length)
+      .fill(null)
+      .map(async (_, i) => {
+        await new Promise(resolve => setTimeout(resolve, i * 10));
+        this.shootSound.play();
+      });
+
     return this.shootingBatch;
   }
 
@@ -35,6 +43,7 @@ class Cannon_A extends AbstractCannon {
         texture: this.texture,
       },
       this.gameObjectFactory,
+      this.shootSound,
     );
 
     cannon.angle = this.angle;

@@ -7,11 +7,13 @@ import SingleShootingMode from '~state/SingleShootingMode';
 import DoubleShootingMode from '~state/DoubleShootingMode';
 import IVisitor from '~visitor/IVisitor';
 import { CloneableGameObjectPrototype } from '~abstract-factory/entity/CloneableGameObjectPrototype';
+import { default as sound } from 'pixi-sound';
 
 abstract class AbstractCannon extends CloneableGameObjectPrototype {
   protected power: number = GAME_CONFIG.GAME.cannonPower;
   protected gameObjectFactory: IGameObjectFactory;
   protected shootingMode: IShootingMode;
+  protected shootSound: sound.Sound;
 
   abstract shoot(): AbstractMissile[];
 
@@ -20,7 +22,7 @@ abstract class AbstractCannon extends CloneableGameObjectPrototype {
   protected static SINGLE_SHOOTING_MODE = new SingleShootingMode();
   protected static DOUBLE_SHOOTING_MODE = new DoubleShootingMode();
 
-  constructor(params: GameObjectShape | PIXI.Sprite, factory: IGameObjectFactory) {
+  constructor(params: GameObjectShape | PIXI.Sprite, factory: IGameObjectFactory, shootSound: sound.Sound) {
     super({
       ...params,
       blockedMoveDirections: [MoveDirection.LEFT, MoveDirection.RIGHT],
@@ -29,6 +31,7 @@ abstract class AbstractCannon extends CloneableGameObjectPrototype {
     this.shootingMode = AbstractCannon.SINGLE_SHOOTING_MODE;
     this.anchor.set(0.5, 0.5);
     this.angle = 0;
+    this.shootSound = shootSound;
   }
 
   move(direction: MoveDirection) {
