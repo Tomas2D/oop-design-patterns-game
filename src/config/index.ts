@@ -26,7 +26,7 @@ export const GAME_CONFIG: GameConfigShape = {
   PIXI: {
     width: 1024,
     height: 650,
-    backgroundColor: 0xaaaaaa,
+    backgroundColor: 0xffffff,
     autoStart: false,
     antialias: false,
   },

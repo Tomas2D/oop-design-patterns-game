@@ -6,8 +6,12 @@ class GameInfo_A extends AbstractGameInfo {
   }
 
   clone(): AbstractGameInfo {
-    const gameInfo = new GameInfo_A(this.getText(), { ...this.style });
+    const gameInfo = new GameInfo_A({ ...this.style }, this.levelUpSound);
     gameInfo.position = this.position.clone();
+    gameInfo.level = this.level;
+    gameInfo.score = this.score;
+    gameInfo.enemiesLeft = this.enemiesLeft;
+
     return gameInfo;
   }
 }

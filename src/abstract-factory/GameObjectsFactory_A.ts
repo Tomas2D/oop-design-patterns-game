@@ -56,11 +56,14 @@ class GameObjectsFactory_A extends BaseGameObjectsFactory {
   }
 
   createGameInfo(): AbstractGameInfo {
-    const obj = new GameInfo_A('', {
-      fontFamily: 'Arial',
-      fontSize: 16,
-      fill: 0xffff00,
-    });
+    const obj = new GameInfo_A(
+      {
+        fontFamily: 'Arial',
+        fontSize: 16,
+        fill: 0x2aa700,
+      },
+      sound.find('levelUpSound'),
+    );
     obj.position.set(5, 5);
     return obj;
   }
@@ -82,6 +85,7 @@ class GameObjectsFactory_A extends BaseGameObjectsFactory {
     this.loader.add('shootSound', 'sounds/shoot.mp3');
     this.loader.add('hitSound', 'sounds/hit.mp3');
     this.loader.add('killSound', 'sounds/kill.mp3');
+    this.loader.add('levelUpSound', 'sounds/level_up.mp3');
 
     const promise = new Promise((success, error) => {
       this.loader.onComplete.add(success);

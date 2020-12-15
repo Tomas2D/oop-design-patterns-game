@@ -122,7 +122,9 @@ export class GameModel implements IGameModel {
 
     if (this.enemies.length === 0) {
       this.createEnemies(GAME_CONFIG.GAME.enemiesCount);
+      this.gameInfo.levelUp();
       this.level++;
+
       this.enemiesMovingSet = false;
     }
 
