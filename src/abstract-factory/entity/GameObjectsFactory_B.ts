@@ -24,7 +24,7 @@ class GameObjectsFactory_B extends BaseGameObjectsFactory {
         texture: this.loader.resources['cannonB'].texture,
         x: 50,
         y: 250,
-        speed: 10,
+        speed: 12,
       },
       this,
       shootSound,

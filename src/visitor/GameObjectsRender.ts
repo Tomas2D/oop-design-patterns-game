@@ -23,6 +23,7 @@ class GameObjectsRender implements IVisitor {
   visitCannon(cannon: AbstractCannon) {
     const angle = `Angle: ${cannon.getAngle().toFixed(1)}`;
     const power = `Power: ${cannon.getPower().toFixed(1)}`;
+    const speed = `Speed: ${cannon.getSpeed().toFixed(1)}`;
     const y = `Y: ${cannon.position.y}`;
 
     if (!cannon.parent) {
@@ -45,6 +46,14 @@ class GameObjectsRender implements IVisitor {
         },
         cannon,
       );
+      this.renderTextInfo(
+        speed,
+        {
+          x: -cannon.width / 2,
+          y: 15,
+        },
+        cannon,
+      );
     } else {
       const yChild = cannon.getChildAt(0) as PIXI.Text;
       yChild.text = y;
@@ -54,6 +63,9 @@ class GameObjectsRender implements IVisitor {
 
       const powerChild = cannon.getChildAt(2) as PIXI.Text;
       powerChild.text = power;
+
+      const speedChild = cannon.getChildAt(3) as PIXI.Text;
+      speedChild.text = speed;
     }
   }
 

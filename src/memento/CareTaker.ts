@@ -1,5 +1,4 @@
 import IGameModel from '~proxy/IGameModel';
-import * as PIXI from 'pixi.js';
 
 /**
  * Implemented as Singleton

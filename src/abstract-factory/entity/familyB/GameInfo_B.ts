@@ -1,8 +1,11 @@
 import AbstractGameInfo from '~abstract-factory/entity/AbstractGameInfo';
+import { ActionCounter } from '~singleton/ActionCounter';
 
 class GameInfo_B extends AbstractGameInfo {
   getText() {
-    return `Game info [B]: Enemies left: ${this.enemiesLeft}, Total score: ${this.score}, Level: ${this.level}`;
+    return `Game info [B]: Total score: ${this.score}, Level: ${
+      this.level
+    },  Total actions: ${ActionCounter.getInstance().getCount()}`;
   }
 
   clone(): AbstractGameInfo {

@@ -2,7 +2,7 @@ import * as PIXI from 'pixi.js';
 
 import { GAME_CONFIG, GAME_RESOURCE_PATH } from '~config';
 import IObserver from '../observer/IObserver';
-import IGameObjectFactory, { EnemyType } from '~abstract-factory/IGameObjectFactory';
+import IGameObjectFactory, { EnemyType, FamilyType } from '~abstract-factory/IGameObjectFactory';
 import GameObjectsFactory_A from '~abstract-factory/GameObjectsFactory_A';
 import AbstractMissile from '~abstract-factory/entity/AbstractMissile';
 import AbstractCannon from '~abstract-factory/entity/AbstractCannon';
@@ -20,6 +20,7 @@ import { IObserverEvent } from '~observer/IObserverEvent';
 import SimpleMovingStrategy from '~strategy/SimpleMovingStrategy';
 import RealisticMovingStrategy from '~strategy/RealisticMovingStrategy';
 import GameObjectsFactory_B from '~abstract-factory/entity/GameObjectsFactory_B';
+import { ActionCounter } from '~singleton/ActionCounter';
 
 // As there is no export, it is like Java private class
 class Memento {
@@ -185,7 +186,7 @@ export class GameModel implements IGameModel {
     }
   }
 
-  public checkCollision(a: GameObjectSizes, b: GameObjectSizes) {
+  checkCollision(a: GameObjectSizes, b: GameObjectSizes) {
     return a.x + a.width > b.x && a.x < b.x + b.width && a.y + a.height > b.y && a.y < b.y + b.height;
   }
 
@@ -340,7 +341,10 @@ export class GameModel implements IGameModel {
 
     this.gameObjectFactory = m.gameObjectFactory;
     this.missiles.forEach(missile => missile.resetBornAt());
-    this.notifyObservers({ updateGame: true });
+    this.notifyObservers({
+      updateGame: true,
+      currentGameObjectFamilyType: this.gameObjectFactory instanceof GameObjectsFactory_A ? FamilyType.A : FamilyType.B,
+    });
     this.update();
   }
 
@@ -363,6 +367,8 @@ export class GameModel implements IGameModel {
 
     const command = this.executedCommands.pop();
     command.unExecute();
+
+    ActionCounter.getInstance().decrement();
   }
 
   private executeCommands(): void {
@@ -370,6 +376,7 @@ export class GameModel implements IGameModel {
       const command = this.unexecutedCommands.dequeue();
       command.doExecute();
 
+      ActionCounter.getInstance().increment();
       this.executedCommands.push(command);
     }
   }
@@ -428,6 +435,9 @@ export class GameModel implements IGameModel {
     this.gameInfo.destroy();
     this.gameInfo = newFactory.createGameInfo();
 
+    this.notifyObservers({
+      currentGameObjectFamilyType: newFactory instanceof GameObjectsFactory_A ? FamilyType.A : FamilyType.B,
+    });
     this.update();
     return true;
   }

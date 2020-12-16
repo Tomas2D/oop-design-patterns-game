@@ -4,6 +4,7 @@ import IObserver from '../observer/IObserver';
 import IGameModel from '~proxy/IGameModel';
 import { IGameGraphics } from '~bridge/IGameGraphics';
 import { IObserverEvent } from '~observer/IObserverEvent';
+import { FamilyType } from '~abstract-factory/IGameObjectFactory';
 
 class GameView implements IObserver {
   private readonly controller: GameController;
@@ -49,6 +50,15 @@ class GameView implements IObserver {
         obj.removeChildren();
       });
     }
+
+    if (e?.currentGameObjectFamilyType !== undefined) {
+      if (e.currentGameObjectFamilyType === FamilyType.A) {
+        this.renderContext.fillBackground(0xffffff);
+      } else {
+        this.renderContext.fillBackground(0x000000);
+      }
+    }
+
     this.render();
   }
 }
