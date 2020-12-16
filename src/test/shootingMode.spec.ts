@@ -1,12 +1,14 @@
 import { GameModel } from '~model/GameModel';
-import { MoveCannonUp } from '~command/MoveCannonUp';
 import { createMockServer } from '~test/server';
-import { MoveCannonDown } from '~command/MoveCannonDown';
 
 let server;
 
 beforeAll(() => {
   server = createMockServer();
+});
+
+beforeEach(() => {
+  document.body.innerHTML = '';
 });
 
 afterAll(async () => {
@@ -18,7 +20,6 @@ test('Test changing shoot mode', async () => {
   await model.loadResources();
   model.createGameObjects();
 
-  // One down
   const initialMode = model.getCannon().getShootingMode();
   model.cannonToggleShootingMode();
   let changedMode = model.getCannon().getShootingMode();

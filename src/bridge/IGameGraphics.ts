@@ -3,8 +3,9 @@ import { IPosition } from '~abstract-factory/entity/IPosition';
 import AbstractGameInfo from '~abstract-factory/entity/AbstractGameInfo';
 
 export interface IGameGraphics {
-  drawText(text: string, position: IPosition, gameObject: GameObject);
+  drawText(text: string, position: IPosition, gameObject?: GameObject);
   drawRectangle(leftTop: IPosition, rightBottom: IPosition);
   addChild(...children: GameObject[] | AbstractGameInfo[]);
   removeChildren();
+  drawHelp();
 }

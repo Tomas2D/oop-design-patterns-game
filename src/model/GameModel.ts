@@ -1,5 +1,4 @@
 import * as PIXI from 'pixi.js';
-import { Loader, Rectangle } from 'pixi.js';
 
 import { GAME_CONFIG, GAME_RESOURCE_PATH } from '~config';
 import IObserver from '../observer/IObserver';
@@ -11,7 +10,6 @@ import GameObject, { GameObjectSizes, MoveDirection } from '~abstract-factory/en
 import AbstractEnemy from '~abstract-factory/entity/AbstractEnemy';
 import AbstractGameInfo from '~abstract-factory/entity/AbstractGameInfo';
 import IMovingStrategy from '~strategy/IMovingStrategy';
-import RealisticMovingStrategy from '~strategy/RealisticMovingStrategy';
 import IGameModel from '~proxy/IGameModel';
 import { AbstractGameCommand } from '~command/AbstractGameCommand';
 import { Queue } from 'queue-typescript';
@@ -19,6 +17,9 @@ import { Stack } from 'stack-typescript';
 import AbstractCollision from '~abstract-factory/entity/AbstractCollision';
 import { IPosition } from '~abstract-factory/entity/IPosition';
 import { IObserverEvent } from '~observer/IObserverEvent';
+import SimpleMovingStrategy from '~strategy/SimpleMovingStrategy';
+import RealisticMovingStrategy from '~strategy/RealisticMovingStrategy';
+import GameObjectsFactory_B from '~abstract-factory/entity/GameObjectsFactory_B';
 
 // As there is no export, it is like Java private class
 class Memento {
@@ -27,13 +28,17 @@ class Memento {
   cannon: AbstractCannon;
   missiles: AbstractMissile[];
   collisions: AbstractCollision[];
+  gameObjectFactory: IGameObjectFactory;
 
   score: number;
   level: number;
 }
 
 export class GameModel implements IGameModel {
-  private readonly loader: Loader;
+  private readonly loader: PIXI.Loader;
+
+  protected static SIMPLE_MOVING_STRATEGY = new SimpleMovingStrategy();
+  protected static REALISTIC_MOVING_STRATEGY = new RealisticMovingStrategy();
 
   /* Game objects */
   private cannon: AbstractCannon;
@@ -57,16 +62,16 @@ export class GameModel implements IGameModel {
   private level: number = 1;
 
   /* Strategies */
-  private readonly movingStrategy: IMovingStrategy;
+  private movingStrategy: IMovingStrategy;
 
   /* Set enemies moving on the screen */
   private enemiesMovingSet = false;
 
-  constructor(loader?: Loader) {
+  constructor(loader?: PIXI.Loader) {
     this.loader = loader || new PIXI.Loader();
     this.loader.baseUrl = GAME_RESOURCE_PATH;
     this.gameObjectFactory = new GameObjectsFactory_A(this.loader, this);
-    this.movingStrategy = new RealisticMovingStrategy();
+    this.movingStrategy = GameModel.REALISTIC_MOVING_STRATEGY;
   }
 
   async loadResources() {
@@ -121,15 +126,18 @@ export class GameModel implements IGameModel {
     this.moveEnemies();
 
     if (this.enemies.length === 0) {
-      this.createEnemies(GAME_CONFIG.GAME.enemiesCount);
-      this.gameInfo.levelUp();
-      this.level++;
-
-      this.enemiesMovingSet = false;
+      this.levelUp();
     }
 
     this.updateGameInfo();
     this.notifyObservers();
+  }
+
+  levelUp() {
+    this.createEnemies(GAME_CONFIG.GAME.enemiesCount);
+    this.gameInfo.levelUp();
+    this.level++;
+    this.enemiesMovingSet = false;
   }
 
   updateGameInfo() {
@@ -177,7 +185,7 @@ export class GameModel implements IGameModel {
     }
   }
 
-  public static checkCollision(a: GameObjectSizes, b: GameObjectSizes) {
+  public checkCollision(a: GameObjectSizes, b: GameObjectSizes) {
     return a.x + a.width > b.x && a.x < b.x + b.width && a.y + a.height > b.y && a.y < b.y + b.height;
   }
 
@@ -189,7 +197,7 @@ export class GameModel implements IGameModel {
       for (let j = this.enemies.length - 1; j >= 0; j--) {
         const enemy = this.enemies[j];
 
-        if (GameModel.checkCollision(missile, enemy)) {
+        if (this.checkCollision(missile, enemy)) {
           enemy.hitEnemy(this.cannon.getPower());
 
           missile.destroy();
@@ -247,10 +255,10 @@ export class GameModel implements IGameModel {
     };
 
     const hasCollision = this.enemies.some(enemy => {
-      const enemyBox = new Rectangle(enemy.x, enemy.y, enemy.width + 100, enemy.height);
-      const newEnemyBox = new Rectangle(position.x, position.y - 25, enemy.width + 100, enemy.height + 25);
+      const enemyBox = new PIXI.Rectangle(enemy.x, enemy.y, enemy.width + 100, enemy.height);
+      const newEnemyBox = new PIXI.Rectangle(position.x, position.y - 25, enemy.width + 100, enemy.height + 25);
 
-      return GameModel.checkCollision(enemyBox, newEnemyBox);
+      return this.checkCollision(enemyBox, newEnemyBox);
     });
 
     // Generate again
@@ -274,11 +282,15 @@ export class GameModel implements IGameModel {
   }
 
   cannonPowerUp() {
-    this.cannon.powerUp();
+    if (this.cannon.getPower() < 50) {
+      this.cannon.powerUp();
+    }
   }
 
   cannonPowerDown() {
-    this.cannon.powerDown();
+    if (this.cannon.getPower() > 0) {
+      this.cannon.powerDown();
+    }
   }
 
   cannonToggleShootingMode() {
@@ -290,7 +302,7 @@ export class GameModel implements IGameModel {
   }
 
   getCannonPosition(): IPosition {
-    return { x: this.cannon.x, y: this.cannon.y };
+    return this.cannon.getPosition();
   }
 
   createMemento(): object {
@@ -301,6 +313,7 @@ export class GameModel implements IGameModel {
     m.gameInfo = this.gameInfo.clone();
     m.missiles = this.missiles.map(missile => missile.clone());
     m.collisions = this.collisions.map(collision => collision.clone());
+    m.gameObjectFactory = this.gameObjectFactory;
 
     m.score = this.score;
     m.level = this.level;
@@ -325,6 +338,7 @@ export class GameModel implements IGameModel {
     this.score = m.score;
     this.level = m.level;
 
+    this.gameObjectFactory = m.gameObjectFactory;
     this.missiles.forEach(missile => missile.resetBornAt());
     this.notifyObservers({ updateGame: true });
     this.update();
@@ -332,6 +346,10 @@ export class GameModel implements IGameModel {
 
   getLevel(): number {
     return this.level;
+  }
+
+  getScore(): number {
+    return this.score;
   }
 
   registerCommand(command: AbstractGameCommand) {
@@ -365,5 +383,52 @@ export class GameModel implements IGameModel {
         this.collisions.splice(i, 1);
       }
     }
+  }
+
+  toggleGravityMode(): void {
+    if (this.movingStrategy instanceof SimpleMovingStrategy) {
+      this.movingStrategy = GameModel.REALISTIC_MOVING_STRATEGY;
+    } else {
+      this.movingStrategy = GameModel.SIMPLE_MOVING_STRATEGY;
+    }
+  }
+
+  async toggleGameObjectFactory(): Promise<boolean> {
+    if (this.gameObjectFactory.isLoaderLoading()) {
+      return false;
+    }
+
+    let newFactory: IGameObjectFactory;
+    if (this.gameObjectFactory instanceof GameObjectsFactory_A) {
+      newFactory = new GameObjectsFactory_B(this.loader, this);
+    } else {
+      newFactory = new GameObjectsFactory_A(this.loader, this);
+    }
+
+    await newFactory.loadResources();
+
+    this.gameObjectFactory = newFactory;
+    this.cannon.setGameObjectFactory(newFactory);
+
+    const newCannon = newFactory.createCannon();
+    this.cannon.texture = newCannon.texture;
+    this.cannon.setSpeed(newCannon.getSpeed());
+
+    const newEnemy = newFactory.createEnemy({ x: 0, y: 0 }, EnemyType.A);
+    this.enemies.forEach(oldEnemy => {
+      oldEnemy.texture = newEnemy.texture;
+      oldEnemy.setSpeed(newEnemy.getSpeed());
+    });
+
+    const collision = newFactory.createCollision({ x: 0, y: 0 });
+    this.collisions.forEach(oldCollision => {
+      oldCollision.texture = collision.texture;
+    });
+
+    this.gameInfo.destroy();
+    this.gameInfo = newFactory.createGameInfo();
+
+    this.update();
+    return true;
   }
 }

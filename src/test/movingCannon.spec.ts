@@ -13,24 +13,32 @@ afterAll(async () => {
   return await new Promise(resolve => server.close(resolve));
 });
 
-test('Test moving with cannon (Command)', async () => {
-  const model = new GameModel();
+describe('Test case: Moving with cannon (Command)', () => {
+  let model: GameModel;
+  let initialPosition;
 
-  await model.loadResources();
-  model.createGameObjects();
-
-  const initialPosition = model.getCannonPosition();
+  beforeAll(async () => {
+    model = new GameModel();
+    await model.loadResources();
+    model.createGameObjects();
+    initialPosition = model.getCannonPosition();
+  });
 
   // One down
-  model.registerCommand(new MoveCannonDown(model));
-  model.update();
-  let newPosition = model.getCannonPosition();
-  expect(initialPosition).not.toStrictEqual(newPosition);
+  it('goes down', () => {
+    model.registerCommand(new MoveCannonDown(model));
+    model.update();
+
+    const newPosition = model.getCannonPosition();
+    expect(initialPosition).not.toStrictEqual(newPosition);
+  });
 
   // One up
-  model.registerCommand(new MoveCannonUp(model));
-  model.update();
-  newPosition = model.getCannonPosition();
+  it('goes up', () => {
+    model.registerCommand(new MoveCannonUp(model));
+    model.update();
 
-  expect(newPosition).toStrictEqual(initialPosition);
+    const newPosition = model.getCannonPosition();
+    expect(newPosition).toStrictEqual(initialPosition);
+  });
 });

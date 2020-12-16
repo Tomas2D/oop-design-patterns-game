@@ -21,6 +21,7 @@ abstract class AbstractEnemy extends CloneableGameObjectPrototype {
     this.hp = hp;
     this.hitSound = hitSound;
     this.killSound = killSound;
+    this.position.set(params.x, params.y);
   }
 
   acceptVisitor(visitor: IVisitor) {
@@ -58,18 +59,32 @@ abstract class AbstractEnemy extends CloneableGameObjectPrototype {
     }
   }
 
+  setHp(hp: number) {
+    this.hp = hp;
+  }
+
   hitEnemy(power: number) {
     this.hp -= power;
     if (this.hp <= 0) {
-      this.killSound.play();
+      sound && this.killSound.play();
       this.hp = 0;
     } else {
-      this.hitSound.play();
+      sound && this.hitSound.play();
     }
   }
 
   getHp() {
     return this.hp;
+  }
+
+  getSpeed() {
+    return this.speed;
+  }
+
+  setSpeed(speed: number) {
+    if (speed >= 0) {
+      this.speed = speed;
+    }
   }
 
   abstract clone();

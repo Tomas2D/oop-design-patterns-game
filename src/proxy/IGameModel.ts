@@ -54,6 +54,10 @@ interface IGameModel extends IObservable {
   loadResources();
 
   getLevel(): number;
+
+  toggleGravityMode(): void;
+
+  toggleGameObjectFactory(): Promise<boolean>;
 }
 
 export default IGameModel;

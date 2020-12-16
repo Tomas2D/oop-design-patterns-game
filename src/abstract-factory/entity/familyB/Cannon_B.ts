@@ -1,8 +1,8 @@
 import AbstractCannon from '~abstract-factory/entity/AbstractCannon';
 
-class Cannon_A extends AbstractCannon {
-  clone(): Cannon_A {
-    const cannon = new Cannon_A(
+class Cannon_B extends AbstractCannon {
+  clone(): Cannon_B {
+    const cannon = new Cannon_B(
       {
         x: this.x,
         y: this.y,
@@ -22,4 +22,4 @@ class Cannon_A extends AbstractCannon {
   }
 }
 
-export default Cannon_A;
+export default Cannon_B;

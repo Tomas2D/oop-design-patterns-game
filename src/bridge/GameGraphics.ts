@@ -3,6 +3,7 @@ import { IGameGraphics } from '~bridge/IGameGraphics';
 import { IGameGraphicsImplementor } from '~bridge/IGameGraphicsImplementor';
 import { IPosition } from '~abstract-factory/entity/IPosition';
 import AbstractGameInfo from '~abstract-factory/entity/AbstractGameInfo';
+import { GAME_CONFIG } from '~config';
 
 export class GameGraphics implements IGameGraphics {
   private implementor: IGameGraphicsImplementor;
@@ -11,7 +12,7 @@ export class GameGraphics implements IGameGraphics {
     this.implementor = implementor;
   }
 
-  drawText(text: string, position: IPosition, gameObject: GameObject) {
+  drawText(text: string, position: IPosition, gameObject?: GameObject) {
     this.implementor.drawText(text, position, gameObject);
   }
 
@@ -28,5 +29,12 @@ export class GameGraphics implements IGameGraphics {
 
   removeChildren() {
     this.implementor.removeChildren();
+  }
+
+  drawHelp() {
+    this.implementor.drawText('Keys: Up, Down, Left, Right, Space, Q, W, P, B, G, L', {
+      x: GAME_CONFIG.PIXI.width - 350,
+      y: 6,
+    });
   }
 }

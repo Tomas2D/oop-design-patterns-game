@@ -10,6 +10,11 @@ export enum EnemyType {
   B,
 }
 
+export enum FamilyType {
+  A,
+  B,
+}
+
 interface IGameObjectFactory {
   createCannon(): AbstractCannon;
   createMissile(position: IPosition, angle: Number, velocity: Number): AbstractMissile;
@@ -18,6 +23,8 @@ interface IGameObjectFactory {
   createGameInfo(): AbstractGameInfo;
 
   loadResources(): Promise<any>;
+
+  isLoaderLoading(): Boolean;
 }
 
 export default IGameObjectFactory;

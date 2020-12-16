@@ -15,10 +15,6 @@ abstract class AbstractCannon extends CloneableGameObjectPrototype {
   protected shootingMode: IShootingMode;
   protected shootSound: sound.Sound;
 
-  abstract shoot(): AbstractMissile[];
-
-  abstract primitiveShoot(): void;
-
   protected static SINGLE_SHOOTING_MODE = new SingleShootingMode();
   protected static DOUBLE_SHOOTING_MODE = new DoubleShootingMode();
 
@@ -32,6 +28,34 @@ abstract class AbstractCannon extends CloneableGameObjectPrototype {
     this.anchor.set(0.5, 0.5);
     this.angle = 0;
     this.shootSound = shootSound;
+  }
+
+  protected shootingBatch: AbstractMissile[] = [];
+
+  setGameObjectFactory(goFactory: IGameObjectFactory) {
+    this.gameObjectFactory = goFactory;
+  }
+
+  primitiveShoot() {
+    const missile = this.gameObjectFactory.createMissile(this.getVertexXY(), this.getAngle(), this.getPower());
+
+    missile.angle = this.angle;
+    this.shootingBatch.push(missile);
+  }
+
+  shoot() {
+    this.shootingBatch.length = 0;
+    this.shootingMode.shoot(this);
+
+    // Delay sounds when multishooting
+    Array(this.shootingBatch.length)
+      .fill(null)
+      .map(async (_, i) => {
+        await new Promise(resolve => setTimeout(resolve, i * 10));
+        this.shootSound?.play();
+      });
+
+    return this.shootingBatch;
   }
 
   move(direction: MoveDirection) {
@@ -51,16 +75,16 @@ abstract class AbstractCannon extends CloneableGameObjectPrototype {
 
   aimUp() {
     let angle = this.angle - GAME_CONFIG.GAME.angleStep;
-    if (angle < -60) {
-      angle = -60;
+    if (angle <= GAME_CONFIG.GAME.minAngle) {
+      angle = GAME_CONFIG.GAME.minAngle;
     }
     this.angle = angle;
   }
 
   aimDown() {
     let angle = this.angle + GAME_CONFIG.GAME.angleStep;
-    if (angle > 30) {
-      angle = 30;
+    if (angle > GAME_CONFIG.GAME.maxAngle) {
+      angle = GAME_CONFIG.GAME.maxAngle;
     }
     this.angle = angle;
   }
@@ -95,6 +119,22 @@ abstract class AbstractCannon extends CloneableGameObjectPrototype {
 
   getShootingMode() {
     return this.shootingMode;
+  }
+
+  getVertexXY() {
+    return { x: this['vertexData'][2], y: this['vertexData'][3] };
+  }
+
+  setPower(power: number) {
+    this.power = power;
+  }
+
+  setSpeed(speed: number) {
+    this.speed = speed;
+  }
+
+  getSpeed() {
+    return this.speed;
   }
 
   abstract clone();

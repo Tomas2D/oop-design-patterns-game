@@ -23,7 +23,7 @@ abstract class AbstractGameInfo extends PIXI.Text implements ICloneable {
 
   public levelUp() {
     this.level++;
-    this.levelUpSound.play();
+    sound && this.levelUpSound.play();
   }
 
   public setLevel(level: number) {

@@ -6,7 +6,7 @@
   "scripts": {
     "start": "rm -Rf .cache; rm -Rf dist; parcel src/index.html",
     "build": "rm -Rf .cache; rm -Rf dist; parcel build src/index.html",
-    "test": "jest"
+    "test": "jest --runInBand"
   },
   "author": "Tomáš Dvořák (Tomas2D)",
   "license": "ISC",
@@ -15,12 +15,10 @@
     "eslint-config-ackee": "^0.9.2",
     "http-server": "^0.12.3",
     "jest": "^26.6.3",
-    "jest-fetch-mock": "^3.0.3",
     "pixi-sound": "^3.0.5",
     "pixi.js": "^5.3.3",
     "queue-typescript": "^1.0.1",
-    "stack-typescript": "^1.0.4",
-    "yy-intersects": "^1.0.8"
+    "stack-typescript": "^1.0.4"
   },
   "devDependencies": {
     "@types/jest": "^26.0.19",

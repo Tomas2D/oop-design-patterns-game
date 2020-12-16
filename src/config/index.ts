@@ -19,6 +19,9 @@ export type GameConfigShape = {
     minEnemySpawnOffset: number;
     statusBarHeight: number;
     maxMementos: number;
+
+    maxAngle: number;
+    minAngle: number;
   };
 };
 
@@ -43,6 +46,9 @@ export const GAME_CONFIG: GameConfigShape = {
     statusBarHeight: 30,
 
     maxMementos: 10,
+
+    maxAngle: 60,
+    minAngle: -60,
   },
 };
 

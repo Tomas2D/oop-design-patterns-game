@@ -11,6 +11,10 @@ abstract class BaseGameObjectsFactory implements IGameObjectFactory {
     this.gameModel = gameModel;
   }
 
+  isLoaderLoading(): boolean {
+    return this.loader.loading;
+  }
+
   abstract loadResources(): Promise<any>;
 
   abstract createCannon();

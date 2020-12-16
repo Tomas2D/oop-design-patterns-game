@@ -108,6 +108,14 @@ class GameModelProxy implements IGameModel {
   getLevel(): number {
     return this.subject.getLevel();
   }
+
+  toggleGravityMode(): void {
+    return this.subject.toggleGravityMode();
+  }
+
+  async toggleGameObjectFactory() {
+    return await this.subject.toggleGameObjectFactory();
+  }
 }
 
 export default GameModelProxy;

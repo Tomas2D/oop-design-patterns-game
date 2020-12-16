@@ -1,9 +1,9 @@
 import AbstractEnemy from '~abstract-factory/entity/AbstractEnemy';
 
-class Enemy_A extends AbstractEnemy {
+class Enemy_B extends AbstractEnemy {
   // Prototype pattern
-  clone(): Enemy_A {
-    const enemy = new Enemy_A(
+  clone(): Enemy_B {
+    const enemy = new Enemy_B(
       {
         x: this.x,
         y: this.y,
@@ -22,4 +22,4 @@ class Enemy_A extends AbstractEnemy {
   }
 }
 
-export default Enemy_A;
+export default Enemy_B;

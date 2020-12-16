@@ -1,6 +1,10 @@
 import { createServer, Server } from 'http';
 import * as fs from 'fs';
 
+/**
+ * We need to create temporary server
+ * to serve static assets during tests
+ */
 export function createMockServer(): Server {
   return createServer(async (req, res) => {
     const { url } = req;
@@ -10,7 +14,8 @@ export function createMockServer(): Server {
     res.writeHead(200, {
       'Content-Length': stat.size,
     });
+
     const readStream = fs.createReadStream(path);
     readStream.pipe(res);
-  }).listen(80);
+  }).listen(9000);
 }

@@ -1,9 +1,10 @@
 import * as PIXI from 'pixi.js';
 import IVisitable from '~visitor/IVisitable';
 import IVisitor from '~visitor/IVisitor';
+import { IPosition } from '~abstract-factory/entity/IPosition';
 
 export type GameObjectShape = {
-  texture: PIXI.Texture;
+  texture?: PIXI.Texture;
   x: number;
   y: number;
   speed?: number;
@@ -25,7 +26,7 @@ export enum MoveDirection {
 }
 
 abstract class GameObject extends PIXI.Sprite implements IVisitable {
-  protected readonly speed: number;
+  protected speed: number;
   protected readonly blockedMoveDirections: Array<MoveDirection>;
 
   constructor(params: GameObjectShape) {
@@ -39,7 +40,7 @@ abstract class GameObject extends PIXI.Sprite implements IVisitable {
   }
 
   move(direction: MoveDirection): void {
-    if (this.blockedMoveDirections.includes(direction)) {
+    if (this.speed === 0 || this.blockedMoveDirections.includes(direction)) {
       return;
     }
 
@@ -57,6 +58,10 @@ abstract class GameObject extends PIXI.Sprite implements IVisitable {
         this.x += this.speed;
         break;
     }
+  }
+
+  getPosition(): IPosition {
+    return { x: this.position.x, y: this.position.y };
   }
 
   abstract acceptVisitor(visitor: IVisitor);

@@ -19,8 +19,8 @@ export class PixiGraphics implements IGameGraphicsImplementor {
     this.gc.addChild(line);
   }
 
-  drawText(text: string, position: IPosition, sprite: PIXI.Sprite) {
-    const textSprite = new PIXI.Text(text, { fontFamily: 'Arial', fontSize: 13, fill: 0xff1010, textAlign: 'center' });
+  drawText(text: string, position: IPosition, sprite?: PIXI.Sprite) {
+    const textSprite = new PIXI.Text(text, { fontFamily: 'Arial', fontSize: 13, fill: 0xff1010, textAlign: 'left' });
     textSprite.position.x = position.x + 35;
     textSprite.position.y = position.y;
     if (!sprite) {

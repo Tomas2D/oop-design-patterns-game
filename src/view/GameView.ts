@@ -20,8 +20,13 @@ class GameView implements IObserver {
   }
 
   setRenderContext(renderContext: IGameGraphics) {
+    if (this.renderContext) {
+      this.renderContext.removeChildren(); // clear
+    }
     this.renderContext = renderContext;
     this.gameObjectRenderer.setRenderContext(this.renderContext);
+
+    this.renderContext.drawHelp();
   }
 
   getController() {
@@ -39,6 +44,7 @@ class GameView implements IObserver {
   update(e?: IObserverEvent): void {
     if (e?.updateGame) {
       this.renderContext.removeChildren();
+      this.renderContext.drawHelp();
       this.model.getGameObjects().forEach(obj => {
         obj.removeChildren();
       });

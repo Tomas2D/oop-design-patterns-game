@@ -1,5 +1,5 @@
 import IGameModel from '~proxy/IGameModel';
-import { GAME_CONFIG } from '~config';
+import * as PIXI from 'pixi.js';
 
 /**
  * Implemented as Singleton
@@ -21,7 +21,7 @@ class CareTaker {
   }
 
   createMemento(): object {
-    if (this.gameModel !== null) {
+    if (this.gameModel) {
       const memento = this.gameModel.createMemento();
       /*this.mementos.push(memento);
 
@@ -46,7 +46,7 @@ class CareTaker {
   }*/
 
   setMemento(memento: object) {
-    if (this.gameModel !== null) {
+    if (this.gameModel) {
       this.gameModel.setMemento(memento);
     }
   }

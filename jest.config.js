@@ -6,4 +6,5 @@ module.exports = {
   },
   modulePathIgnorePatterns: ['<rootDir>/dist/', '<rootDir>/lib/'],
   testEnvironmentOptions: { resources: 'usable' },
+  testURL: 'http://localhost:9000',
 };

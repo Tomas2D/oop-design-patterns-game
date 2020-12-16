@@ -1,7 +1,7 @@
 import { AbstractGameCommand } from '~command/AbstractGameCommand';
 import IGameModel from '~proxy/IGameModel';
 
-export class AimCannonDown extends AbstractGameCommand {
+export class ToggleGravityMode extends AbstractGameCommand {
   constructor(subject: IGameModel) {
     super();
 
@@ -9,6 +9,6 @@ export class AimCannonDown extends AbstractGameCommand {
   }
 
   protected execute() {
-    this.subject.aimCannonDown();
+    this.subject.toggleGravityMode();
   }
 }

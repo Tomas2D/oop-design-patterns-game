@@ -8,11 +8,18 @@ class DoubleShootingMode implements IShootingMode {
 
   shoot(cannon: AbstractCannon) {
     cannon.aimUp();
+    cannon.aimUp();
+    cannon.aimUp();
     cannon.primitiveShoot();
     cannon.aimDown();
     cannon.aimDown();
     cannon.aimDown();
+
+    cannon.aimDown();
+    cannon.aimDown();
+    cannon.aimDown();
     cannon.primitiveShoot();
+    cannon.aimUp();
     cannon.aimUp();
     cannon.aimUp();
   }

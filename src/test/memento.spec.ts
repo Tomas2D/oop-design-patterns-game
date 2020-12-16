@@ -1,6 +1,7 @@
 import { GameModel } from '~model/GameModel';
 import { MoveCannonUp } from '~command/MoveCannonUp';
 import { createMockServer } from '~test/server';
+import CareTaker from '~memento/CareTaker';
 
 let server;
 
@@ -12,18 +13,23 @@ afterAll(async () => {
   return await new Promise(resolve => server.close(resolve));
 });
 
-test('Test command and his undoing (Memento)', async () => {
+// Get
+test('Test case: execute one command and revert it', async done => {
   const model = new GameModel();
+  CareTaker.getInstance().setModel(model);
   await model.loadResources();
-
   model.createGameObjects();
 
-  const positionBeforeUndo = model.getCannonPosition();
+  const oldPosition = { ...model.getCannonPosition() };
+
   model.registerCommand(new MoveCannonUp(model));
   model.update();
+
+  expect(model.getCannonPosition()).not.toEqual(oldPosition);
+
   model.undoLastCommand();
+  model.update();
 
-  const positionAfterUndo = model.getCannonPosition();
-
-  expect(positionBeforeUndo).toStrictEqual(positionAfterUndo);
+  expect(model.getCannonPosition()).toEqual(oldPosition);
+  await done();
 });
