@@ -35,7 +35,7 @@ class Game {
     document.body.style.overflow = 'hidden';
 
     // Init graphic
-    const gr: IGameGraphics = new GameGraphics(new PixiGraphics(this.app.stage));
+    const gr: IGameGraphics = new GameGraphics(new PixiGraphics(this.app.stage, this.app.renderer));
 
     // MVC
     this.model = new GameModelProxy(new GameModel(this.app.loader));

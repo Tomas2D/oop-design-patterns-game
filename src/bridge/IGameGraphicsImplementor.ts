@@ -6,4 +6,5 @@ export interface IGameGraphicsImplementor {
   drawLine(beginPosition: IPosition, endPosition: IPosition);
   addChild(...children: PIXI.Sprite[]);
   removeChildren();
+  fillBackground(color: number);
 }

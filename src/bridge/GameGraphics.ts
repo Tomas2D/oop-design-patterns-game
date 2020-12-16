@@ -37,4 +37,8 @@ export class GameGraphics implements IGameGraphics {
       y: 6,
     });
   }
+
+  fillBackground(color: number) {
+    this.implementor.fillBackground(color);
+  }
 }

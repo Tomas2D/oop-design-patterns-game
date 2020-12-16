@@ -6,6 +6,7 @@ export interface IGameGraphics {
   drawText(text: string, position: IPosition, gameObject?: GameObject);
   drawRectangle(leftTop: IPosition, rightBottom: IPosition);
   addChild(...children: GameObject[] | AbstractGameInfo[]);
+  fillBackground(color: number);
   removeChildren();
   drawHelp();
 }

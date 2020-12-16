@@ -4,10 +4,13 @@ import { IPosition } from '~abstract-factory/entity/IPosition';
 
 export class PixiGraphics implements IGameGraphicsImplementor {
   private readonly gc: PIXI.Container;
+  private readonly r: PIXI.Renderer;
 
-  constructor(gc: PIXI.Container) {
+  constructor(gc: PIXI.Container, r: PIXI.Renderer) {
     const container = new PIXI.Container();
     container.setParent(gc);
+
+    this.r = r;
     this.gc = gc;
   }
 
@@ -36,5 +39,9 @@ export class PixiGraphics implements IGameGraphicsImplementor {
 
   removeChildren() {
     this.gc.removeChildren();
+  }
+
+  fillBackground(color: number) {
+    this.r.backgroundColor = color;
   }
 }
