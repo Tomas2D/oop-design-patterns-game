@@ -1,17 +1,20 @@
-# Intro
-- Written in TypeScript
-- Based on PIXI.js framework
+# 💬 Intro
+Practical implementation of more than 10 OOP Design patterns in "Angry Birds" like game.
+
+# 💻 Technologies
+- TypeScript
+- PIXI.js framework
 
 # How to start?
 
 ## With docker
 
 ```
-docker build -t dvorat19_app .
-docker run -p 8000:80 -it dvorat19_app # app will be on http://localhost:8000
+docker build -t oop-design-patterns-game .
+docker run -p 8000:80 -it oop-design-patterns-game # app will be available on http://localhost:8000
 ```
 
-For delete, simply run: `docker rmi dvorat19_app`
+For delete, simply run: `docker rmi oop-design-patterns-game`
 
 ## How to run test?
 
